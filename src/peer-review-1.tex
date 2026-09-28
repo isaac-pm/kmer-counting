@@ -1,0 +1,137 @@
+% =====================================================================
+% Green IT 2026 (MICS2-63): Peer Review 1
+%
+% One file per paper reviewed. You submit TWO: this one and
+% peer-review-2.tex. They are identical templates; fill each in against
+% a different paper.
+%
+% Length: ~2 double-column pages each.
+%
+% Build:  latexmk        (from the folder above this one, not from src/)
+% =====================================================================
+\documentclass[conference,a4paper]{IEEEtran}
+
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{url}
+\usepackage{amsmath}
+
+% ---------------------------------------------------------------------
+% Guidance notes. Each one tells you what its section owes.
+% Delete a note as you write its section, and set \guidancetrue below to
+% \guidancefalse before you submit: the PDF you hand in carries no guidance.
+\newif\ifguidance
+\guidancetrue
+\newcommand{\guidance}[1]{\ifguidance{\itshape\small #1\par\medskip}\fi}
+
+\begin{document}
+
+\title{Peer Review 1: \textit{<title of the paper you are reviewing>}}
+
+\author{\IEEEauthorblockN{Anonymous reviewer}
+\IEEEauthorblockA{Green IT 2026 (MICS2-63)\\
+Master in Information and Computer Sciences,
+University of Luxembourg\\[2pt]
+% Build stamp: the date this file was last compiled.
+\scriptsize Compiled \today.}}
+
+\maketitle
+
+
+\guidance{Every italic note in this document is guidance.
+Delete each one as you write its section, then set
+\texttt{\textbackslash guidancefalse} in the preamble: the PDF you submit
+carries no guidance.
+
+The sections below are the parts of the paper, in the paper's own order. Write
+about each one where it belongs: a defect goes in the section it affects.
+
+Reviews are double-blind. Your name stays out of this document. Your
+submission on Moodle is what tells the instructor the review is yours. The
+instructor numbers the reviews when he forwards them, from the author's side,
+so this file being your first review says nothing about the number it arrives
+under.
+
+The paper you receive comes without its AI Usage Journal, which the author
+wrote and the instructor marks separately, and with an archive holding the
+script you are asked to run in Section~IV.
+
+This review carries no score of any kind. Each author receives two reviews of
+their paper. Marks reach students in mid-February.}
+
+% ---------------------------------------------------------------------
+\section{Introduction}
+\guidance{What question does the paper set out to answer, and does the paper
+answer it? Take the claims the introduction makes and say whether the rest of
+the paper supports them.}
+
+% ---------------------------------------------------------------------
+\section{Related Work}
+\guidance{Check the references. Do they exist, and do they say what they are
+cited for? Then judge whether the section situates the author's own
+contribution, or only lists other people's.}
+
+% ---------------------------------------------------------------------
+\section{Life Cycle Assessment}
+\guidance{Judge each subsection of III on whether it does its job. Then
+recompute the baseline from what the paper gives you, and put your figure in
+Table~\ref{tab:recomputation}. Section~III.B declares what makes the paper's
+numbers reproducible: for a web page, whether it arrives compressed and on what
+date that was read, so recompute the bytes on that basis; for an HPC job, the
+commit, the fixed input and the exclusive node it ran on. If you cannot recompute it, say
+precisely what is missing.}
+
+% ---------------------------------------------------------------------
+\section{Optimisation and Payback}
+\guidance{Run the script from the archive distributed with the paper and report
+what happened. Keep a scientific finding apart from an environment problem.
+
+Recompute the remaining figures of Table~\ref{tab:recomputation}. A before and
+an after are comparable when they are produced the same way: for a web page,
+the same server started with the same compression setting; for an HPC job, the
+same partition and node type with the same fixed input. Check that Section~IV
+says which. Then judge whether the optimisation and the payback follow from
+what Section~III found.}
+
+\begin{table}[htbp]
+\centering
+\caption{Recomputation of the author's key figures.}
+\label{tab:recomputation}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.3cm}|r|r|>{\raggedright\arraybackslash}p{2.0cm}|}
+\hline
+\textbf{Quantity} & \textbf{Author} & \textbf{Reviewer} & \textbf{Comment} \\
+\hline
+Baseline, live page or job &  &  &  \\
+\hline
+Before optimisation, frozen copy or original job &  &  &  \\
+\hline
+After optimisation       &  &  &  \\
+\hline
+Development cost         &  &  &  \\
+\hline
+Payback (page views or runs) &  &  &  \\
+\hline
+\end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------
+\section{Threats to Validity}
+\guidance{Judge the threats the author lists, then name one they did not. If
+you looked and found none, say where you looked.}
+
+% ---------------------------------------------------------------------
+\section{Recommendation}
+\guidance{One word: ACCEPT or REJECT. Those are the two options. Taking one
+of them is what this section is for.
+
+Then two or three lines saying why this verdict follows from what you wrote
+above. Which side you take is yours.}
+
+% ---------------------------------------------------------------------
+\section{Actionable Recommendations}
+\guidance{For each issue you raised above, what the author should do. Concrete
+enough to carry out before Fri 18 Dec.}
+
+\end{document}

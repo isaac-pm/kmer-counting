@@ -1,0 +1,102 @@
+% =====================================================================
+% Green IT 2026 (MICS2-63): Response to Reviewers
+% Submitted together with the final paper, as a second PDF.
+%
+% Typically 1 to 2 pages. No minimum.
+%
+% Single column on purpose: this is a letter, quoting your reviewers and
+% answering them. The double-column measure of the paper makes quoted
+% blocks unreadable, so this is the one document of the four that sets
+% `onecolumn`. Same class, so it looks like the rest of your submission.
+%
+% Build:  latexmk        (from the folder above this one, not from src/)
+% =====================================================================
+\documentclass[conference,onecolumn,a4paper]{IEEEtran}
+
+\usepackage[T1]{fontenc}
+\usepackage{url}
+\usepackage{amsmath}
+
+% ---------------------------------------------------------------------
+% Guidance notes. Each one tells you what its section owes.
+% Delete a note as you write its section, and set \guidancetrue below to
+% \guidancefalse before you submit: the PDF you hand in carries no guidance.
+\newif\ifguidance
+\guidancetrue
+\newcommand{\guidance}[1]{\ifguidance{\itshape\small #1\par\medskip}\fi}
+
+\begin{document}
+
+\title{Response to Reviewers: \textit{<title of your paper>}}
+
+\author{\IEEEauthorblockN{<Your Full Name>}
+\IEEEauthorblockA{Master in Information and Computer Sciences,
+University of Luxembourg\\
+<your.name>@student.uni.lu\\[2pt]
+% Build stamp: the date this file was last compiled.
+\scriptsize Compiled \today.}}
+
+\maketitle
+
+
+\guidance{Every italic note in this document is guidance.
+Delete each one as you write its section, then set
+\texttt{\textbackslash guidancefalse} in the preamble: the PDF you submit
+carries no guidance.}
+
+% ---------------------------------------------------------------------
+\section*{Summary of Changes}
+
+\guidance{One paragraph here, 300 words at most. What changed in the paper
+between v1 and the final version, and why. A reader should be able to stop at
+the end of this paragraph and know an overview of what you updated.}
+
+% ---------------------------------------------------------------------
+\section*{Response to Reviewer 1}
+
+\guidance{One numbered block per comment in the review, in the shape below.
+Every comment gets its own block, including the ones you changed nothing for.}
+
+\begin{enumerate}
+
+\item
+\begin{quote}\itshape
+<the reviewer's first comment, quoted verbatim>
+\end{quote}
+
+Modifications made.
+\guidance{What you changed and where: the section, and the sentence or the
+table. A reviewer should find it without re-reading the paper. If nothing
+changed, write ``no change''.}
+
+Argumentation.
+\guidance{Why that change, or why that refusal. Disagreeing is allowed and
+scores well when argued. Conceding every point scores the same as ignoring
+them all.
+
+Weigh a refusal. Repairing the defects your reviewers found is marked in the
+paper itself, so a point you decline that the instructor judges well founded
+stays there as a defect and is marked there. A refusal earns its marks when
+the argument holds.
+
+Argue with the point.}
+
+\item
+\begin{quote}\itshape
+<the reviewer's second comment, quoted verbatim>
+\end{quote}
+
+Modifications made.
+
+Argumentation.
+
+\end{enumerate}
+
+\guidance{And so on, one block per comment, to the end of the review.}
+
+% ---------------------------------------------------------------------
+\section*{Response to Reviewer 2}
+
+\guidance{Same structure as above.}
+
+\end{document}

@@ -1,0 +1,5 @@
+# Input data (fetched from upstream, recorded by URL + SHA-256)
+job/data/M_abscessus_HiSeq_10M.fa.gz
+
+# Job outputs
+*.out

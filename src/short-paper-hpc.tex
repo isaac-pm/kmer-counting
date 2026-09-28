@@ -1,0 +1,521 @@
+% =====================================================================
+% Green IT 2026 (MICS2-63): Short Paper, HPC Job Track
+%
+% This is the document you write if you assess an HPC JOB.
+% If you assess a web page, write src/short-paper-mics.tex instead and
+% delete this file.
+% It compiles as shipped.
+%
+% Length: minimum 4 double-column pages, EXCLUDING guidance text,
+% references and appendices. Printed on page 1 under the author block, so
+% that a student who opens the PDF sees the rule.
+%
+% Build:  latexmk        (run it from the folder above this one)
+% =====================================================================
+\documentclass[conference,a4paper]{IEEEtran}
+
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{amsmath}
+
+% ---------------------------------------------------------------------
+% Guidance notes. Each one tells you what its section owes.
+% Delete a note as you write its section, and set \guidancetrue below to
+% \guidancefalse before you submit: the PDF you hand in carries no guidance.
+% The notes add pages, so that switch is also how you measure your real length.
+\newif\ifguidance
+\guidancetrue
+\newcommand{\guidance}[1]{\ifguidance{\itshape\small #1\par\medskip}\fi}
+
+\begin{document}
+
+\title{Life Cycle Assessment of \textit{<your HPC job>}: Carbon Payback of an AI-Assisted Optimisation}
+
+\author{\IEEEauthorblockN{<Your Full Name>}
+\IEEEauthorblockA{Master in Information and Computer Sciences\\
+University of Luxembourg\\
+<your.name>@student.uni.lu\\[2pt]
+% The page minimum, printed here so it is full width and survives \guidancefalse.
+\small\itshape Minimum of 4 double-column pages, excluding guidance text, references and appendices.\normalfont\upshape\\[2pt]
+% Build stamp: the date this file was last compiled.
+\scriptsize Compiled \today.}}
+
+\maketitle
+
+
+\begin{abstract}
+\guidance{Maximum 200 words, one paragraph. State the job assessed, the
+research question, what you did, the headline numbers (baseline
+gCO\textsubscript{2}e per run, post-optimisation gCO\textsubscript{2}e per run,
+payback in runs), \textbf{all three measured the same way and each named with
+the partition and the allocation shape they were measured on}, and what
+generalises beyond your job. Every sentence states a result.}
+\end{abstract}
+
+\guidance{\textbf{This is the HPC job track.} The archive also holds
+\texttt{src/short-paper-mics.tex}, which is the same paper written for a web
+page. Write one of the two. Delete the other, and the build follows.}
+
+\guidance{Every italic note in this document is guidance.
+Delete each one as you write its section, then set
+\texttt{\textbackslash guidancefalse} in the preamble: the PDF you submit
+carries no guidance. The notes add pages, so that switch is also how you check
+whether you have reached the required length.}
+
+\guidance{Keep the first half of the title above, which names the job you
+assessed. Adapt the second half to your own finding: once you hold your payback
+figure, rewrite it around that. A title that states a finding carries further
+than one that states a topic.}
+
+\guidance{Your paper is reviewed double-blind. Two classmates receive it with
+the author block blanked, with Appendix B removed, and with the repository
+replaced by an archive holding only the script, its README and the LICENSE
+with the name neutralised. Your reviewers may be working on a web page rather
+than on a job, so every convention your paper runs on is stated in the paper.}
+
+% ---------------------------------------------------------------------
+
+\section{Introduction}\label{sec:intro}
+\guidance{Context, the assessed job, and the research question. The
+research question is about the carbon payback of AI-assisted
+optimisation, anchored on your own job. State it explicitly, in one
+sentence, ending with a question mark.}
+
+% ---------------------------------------------------------------------
+\section{Related Work}
+\guidance{Between 3 and 5 references, \emph{all of them found by you}.
+Finding the work that surrounds your question is part of the exercise,
+and it is where an AI assistant needs checking most.
+
+Position your question with respect to them. Do not produce a list of
+summaries: each reference must earn its place by supporting, framing or
+contradicting something you do.
+
+Every reference must be verified by you, by hand. Any reference an AI
+proposed that turns out not to exist must be recorded in Appendix B. A
+reference that does not exist costs you this section.
+
+\emph{What is expected in v1, and what in v2.} The method for searching is
+taught in week 3, six weeks before v1 is due, so you have time to read a
+field. \textbf{In v1 this section is marked on three things: your references
+are there, every one is verified, and the section situates what you did
+against them}. Your reviewers will tell you what is missing, and
+\textbf{v2 is where that section earns its keep}.}
+
+This is how you cite~\cite{example2025}. Delete this sentence and the
+matching entry in \texttt{refs.bib} once you have real references.
+
+% ---------------------------------------------------------------------
+\section{Life Cycle Assessment}
+\guidance{The five subsections below follow Session 3 with respect to
+ISO 14040~\cite{iso14040} and ISO 14044~\cite{iso14044}. In each subsection,
+introduce its intention concisely, then apply it to your job.}
+
+\subsection{Goal and scope definition}\label{sec:goalscope}
+\guidance{\emph{Your functional unit, in one sentence}, answering the
+questions of Session 3 that describe the object: the \emph{job} (one code, one
+commit, one input), the \emph{user} who submits it, the \emph{cluster}, the
+\emph{partition} and the \emph{hardware} it runs on, and the \emph{walltime}
+with the \emph{resources} it holds and how many runs it counts. A reader who
+follows that sentence measures what you measured.
+
+\emph{Then the criterion, and the two names behind it.} One criterion: a carbon
+footprint in CO\textsubscript{2}e. The characterisation method is IPCC 2021 and
+the indicator is GWP100, which are the conventions of this course. Name both
+here, and name them again in Section~\ref{sec:lcia}.
+
+\emph{Then the boundary.} You assess only what you can access: the nodes the
+job holds and for how long, and the site overhead at the PUE you declare. Your
+own laptop and everything the job does not reserve stay outside, and you say so.
+Say which life cycle phases you include and which you exclude.
+
+\emph{Then your four components}, the ones Section~\ref{sec:lci} inventories:
+the compute nodes, the interconnect, the storage, and the site. Capping the
+study at four is a scope decision, so it belongs here, each one named with what
+it covers.}
+
+\subsection{Life cycle inventory}\label{sec:lci}
+\guidance{The quantities your assessment runs on, and how you obtained
+them. Every number here is a physical flow: grams belong to
+Section~\ref{sec:lcia}.
+
+\emph{The measurement.} The commit, the fixed input, an exclusive node so
+nothing else shares it, \emph{five} runs with all five kept and the median
+reported, and the exact fields you read. Say whether the caches
+were warm when each run started, and give the spread from your fastest run to
+your slowest. Whether the first run stands apart from the four that follow is
+something your own five runs show. A reader who follows this paragraph gets your numbers
+back.
+
+\emph{One subsection per component you declared in
+Section~\ref{sec:goalscope}}, written with \texttt{\textbackslash subsubsection}
+so the four appear in order. In each: the quantity and its unit \emph{per
+functional unit}, how you obtained it, the source precise enough to be
+reopened, and the date you read it. Anything shared across many runs, a node
+bought once and used for years above all, is divided down to one run, by a rule
+you state and apply in every subsection.
+
+\emph{What the job record holds.} Your scheduler recorded the physical
+quantities this inventory runs on: the hardware the job held and for how long,
+the energy it drew, the memory it reserved against the memory it touched, and
+the bytes it moved. \textbf{Name the fields you read, and say why each one is
+the quantity you claim it is.} Reserved and touched are not the same flow, and
+the gap between them is an inventory quantity of its own.
+
+\emph{Whether an energy figure comes back at all.} \textbf{Establish that for
+your own runs, say in one sentence how you established it, and give the date.}
+If none comes back, name the substitute you adopt, its source and what it
+leaves out. You are marked on how you determined it, never on what the machine
+answered.
+
+\emph{Embodied quantities} come from elsewhere: the mass or the published
+product carbon footprint of the node, its service life, and the share of it your
+run holds, which is your node-seconds over the node-seconds the machine delivers
+in that life.
+
+\emph{If you had to substitute, say what you used and why it holds.} A
+sourced substitute belongs here. An unsourced one is an assumption, and it
+belongs in Section~\ref{sec:threats}.}
+
+\subsection{Life cycle impact assessment}\label{sec:lcia}
+\guidance{Single-criteria carbon footprint: climate change only. Say so,
+and say what that leaves out.
+
+Name the characterisation method, IPCC 2021, and the indicator you read out of
+it, GWP100. Hold that one indicator across every factor in the paper.
+
+Then name every factor, where it comes from, the date you read it \emph{and its
+basis}: the grid intensity of the country the machine sits in, the PUE you
+declare with the argument that supports it, and then ecoinvent or a vendor
+product carbon footprint sheet for anything made. A local grid factor
+substitutes into the \emph{operational} term only, since hardware is made
+worldwide.
+
+Then the result: your baseline in gCO\textsubscript{2}e per run, with the units
+carried at every step so a reader can follow the chain from joules to grams.
+Your inputs carry two significant digits, so report your answer to two.}
+
+\subsection{Interpretation}\label{sec:interpretation}
+\guidance{What that number is a number \emph{of}, in one sentence.
+
+Then make it mean something. Put it next to the everyday comparators of
+Session 2, a kilometre by car, an hour of a 5\,W LED, a day of a Luxembourg
+resident, and say what one run of your job amounts to in each. Pick the
+comparison that a reader outside this course would understand first.
+
+Then cross-check your own arithmetic. Estimate the energy from the top down,
+the nodes you held times their rated power times the walltime, and put it next
+to the figure Section~\ref{sec:lci} settled on for the same run. Say by how much
+the two differ, and which one your result uses. Say also which kind of check it
+is: a top-down estimate next to a counter reading tests the reading, and next to
+a substitute it tests the substitute.}
+
+\subsection{Reporting}\label{sec:reporting}
+\guidance{Two short paragraphs, written for a reader who did not follow
+the calculation.
+
+First, the result: the number, the functional unit it belongs to, and the
+conventions a reader needs in order to reuse it.
+
+Then \emph{the hotspots}. The rest of the paper hangs on them. Which component,
+or which resource, carries most of your number? Name one, two at most, with the
+share each takes. \textbf{What you name here is what
+Section~\ref{sec:optimisation} attacks.}}
+
+% ---------------------------------------------------------------------
+\section{Optimisation}\label{sec:optimisation}
+
+\subsection{Optimisation procedure}\label{sec:optproc}
+\guidance{Start from the hotspot you named in
+Section~\ref{sec:reporting}. Say how you propose to remove it \emph{in your
+job}: what you change, and why that attacks that hotspot rather than something
+else. Reserved memory nobody uses, a serial phase that holds every node idle, a
+file rewritten at every iteration and an allocation larger than the code can
+fill are the usual four.
+
+Then the mechanics: the commit you start from, the input you hold fixed, and
+the partition and allocation shape you run on. \textbf{Before you change
+anything, measure that starting point with the protocol of
+Section~\ref{sec:lci} and convert it with the factors of
+Section~\ref{sec:lcia}}: that pair, the quantities and the grams that follow
+from them, is your before.
+Then say which optimisations the AI coding agent applied, what you asked for
+and what you accepted, because you are the author of both.}
+
+\subsection{Implementation}
+\guidance{What actually changed in the code or in the job script, concretely
+enough that a reader could make the same changes. Anything the agent proposed
+and you rejected belongs here too, with why. \textbf{Say how you checked that
+the job still produces the same result}: an optimisation that changes the output
+is a different job, and its numbers are no longer comparable.}
+
+\subsection{Footprint after optimisation}\label{sec:afteropt}
+\guidance{Go through Sections~\ref{sec:lci} to~\ref{sec:reporting} again, this
+time on the optimised job, and measure it the same way you measured the
+original. Run it on the same partition and the same node type, with the same
+fixed input, and keep exactly the same functional unit as in
+Section~\ref{sec:goalscope}. Those rules are what make the before and the after
+comparable: a different node type changes the energy per core-second, and your
+saving with it.
+
+Then report only what the optimisation changed: the quantities that moved, the
+new impact figures that follow from them, what the new result means, and the
+hotspots if they are no longer in the same order. If something did not change,
+say so in one line. Finish by saying what you changed to produce the
+difference.}
+
+\subsection{What generalises}
+\guidance{This is the part of your work that outlives your job. It
+is two things, in this order.
+
+\textbf{1. The method.} You have just fixed one hotspot in one job. Now
+write that fix as a procedure for \emph{any} job. Ordinary prose is fine,
+but give it a shape: how a reader recognises the same problem in their own
+job, what they should change, and how they check that it worked. Somebody
+holding different code must be able to follow it without ever seeing
+yours. If a step only makes sense for your job, it belongs in
+Section~\ref{sec:optproc}.
+
+\textbf{2. The tool.} A script, built with AI assistance, that carries out
+that method. It must run on a job it has never seen, given nothing but its
+identifier. Give the repository
+URL and the commit hash, and show that it reproduces the figure you
+reported. \textbf{Your script sits with a \texttt{README} of its own}: what it
+does, how to run it, and what it prints. The repository you cloned this
+template into already carries a \texttt{README} about building the paper, and
+that one answers a different question. Your reviewer receives it as an archive
+and runs it on a machine that has never seen your project, and possibly with no
+cluster at all, so say what it needs and give it something to read when the
+job record is out of reach.
+
+The method to write up is the one you actually worked out on your own
+job: that is the one you can defend, and the one that will still be
+true in January.}
+
+% ---------------------------------------------------------------------
+\section{Carbon Payback}\label{sec:payback}
+\guidance{Divide the full carbon cost of producing your optimisation by the
+saving per run you measured in Section~\ref{sec:afteropt}. Give the result in
+runs, then in a period, using how often the job is really submitted.
+
+\textbf{The numerator is the cost of producing the optimisation}, and
+Appendix~B already computes most of it: the estimated gCO\textsubscript{2}e of
+the AI assistance that produced Section~\ref{sec:optimisation}, plus the runs
+you spent measuring and testing, which on a cluster are themselves an
+allocation. Count those runs with the same factors as your baseline, and say
+which of the two parts you kept.
+
+\textbf{Check that the two numbers you divide come from the same machine.} A
+before measured on one partition and an after measured on another are not a
+saving, they are a comparison of two node types. If the queue moved you, rerun
+the before.}
+
+\subsection{What this means}
+\guidance{Answer the question you asked in Section~\ref{sec:intro}, in one
+sentence, with the number. Then what a reader should take away, and what you
+would do next. Keep to results you have already reported, and to claims your
+figures carry.}
+
+% ---------------------------------------------------------------------
+\section{Threats to Validity}\label{sec:threats}
+\guidance{The threats you could not resolve, and how far each one could move
+your number. Data gaps, estimation choices, and anything the functional unit
+excludes.
+
+Six that this course hands you, and that belong here:
+
+\emph{Every substitute you could not source.} Section~\ref{sec:lci} carries the
+substitutes you could source. The ones you could not are assumptions, and each
+one is named here with what it stands in for and how far it could move your
+result.
+
+\emph{What your energy figure covers.} A counter reading is taken from
+the nodes your job held, and it describes your job alone when the allocation is
+exclusive, which is why your protocol asks for one. On a shared node it
+also carries whatever ran beside you. Whichever figure Section~\ref{sec:lci}
+settled on, a reading or a substitute, the switches that carried the job's
+traffic, the storage that served its files and the cooling that kept it running
+sit outside it, which is why the site enters your study through a declared PUE
+rather than through a meter. Say what that leaves uncertain, and if you
+substituted, how far the substitute could move your result.
+
+\emph{The PUE you declared}, its argument and its source, and what a different
+value would do to your result.
+
+\emph{Figures that are not at the same level of completeness.} One of your factors may be cradle to
+grave while another covers use only. Adding them treats them as if they were the
+same kind of thing. That is often the only data you have. Name every figure
+whose boundary differs from the others, and say in which direction it pushes
+your result.
+
+\emph{Burden shifting}: what a carbon-only criterion hides for your job. An
+improvement that lowers your number can raise a total you did not measure, and a
+job made faster is often a job run more often.
+
+\emph{The limit of one criterion}: these results cover climate change
+only, on one job, and support no comparison with anybody else's job.}
+
+% ---------------------------------------------------------------------
+% Unnumbered on purpose, for two reasons. The paper has six numbered
+% sections, named in Session 1 and in the marking grid, so a numbered
+% seventh would shift every reference to them. And a disclosure statement
+% sits outside the argument anyway, which is where journals place it.
+% It exists because Appendix B is removed at distribution: without this
+% paragraph, a reviewer reads a paper whose AI assistance is declared
+% nowhere.
+\section*{AI Usage Transparency}
+\guidance{Three or four sentences, and the only place your reviewers read
+about your AI use.
+
+Name the models you worked with, say what you used each one for and which
+sections they touched. State
+that you verified every output you kept, and that you are the author of this
+paper and of the script of Section~\ref{sec:optimisation}. Close with the
+total estimated gCO\textsubscript{2}e of that assistance, the figure
+Appendix~B computes.
+
+Two things stay out of it. Anything that points at you: no file path, no
+repository URL, no folder name, since this paragraph travels with the
+anonymised copy your reviewers receive. And the detail: the per-model
+counts, the arithmetic and the wrong answers you caught belong in
+Appendix~B.}
+
+\ifguidance
+\noindent\textit{Worked example, written from the two journal entries of
+Appendix~B.}
+
+Two models assisted this work. ChatGPT (GPT-5.6 Sol) was used in chat, to
+explain the inventory and impact concepts I had not understood and to review
+the prose of this paper. DeepSeek V4-Flash was used agentically, to apply the
+optimisations to the job, to write the script that carries the method to any
+job, and to re-run the measurement protocol after each change. Every
+output I kept was checked against a source I read myself, and the six wrong
+answers I caught are listed in Appendix~B. I am the author of this paper and
+of the script. The assistance amounts to 251\,000 output tokens, estimated at
+28 gCO\textsubscript{2}e in Appendix~B.
+\fi
+
+% ---------------------------------------------------------------------
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+% ---------------------------------------------------------------------
+\guidance{\medskip
+\noindent\textbf{Appendices.}
+\textbf{Every figure and every table in your paper goes in
+Appendix~A.} Do not put a single figure or table in the body: refer to them
+from the text, and place them all there.}
+
+\appendices
+\section{Figures and Tables}
+\guidance{Every figure and every table of your paper.}
+
+% The AI Usage Journal starts on a page of its own. \clearpage rather than
+% \newpage: in a two-column class \newpage ends the current column, while
+% \clearpage ends the whole page and flushes every float still waiting, so
+% a figure belonging to Appendix A is placed before the break.
+\clearpage
+
+\section{AI Usage Journal}
+\guidance{For every AI model used: the model and its version, the total number
+of prompts, the total input and output tokens, the estimated
+gCO\textsubscript{2}e and how you got there, and a comparison with a familiar
+activity. Convert with the course energy factor given in Session~7, applied to
+your \emph{output} tokens, and the grid factor you declared in
+Section~\ref{sec:lcia}. Cover every kind of AI use, chat assistants and agentic
+tools alike.
+
+Then, in prose: the kinds of task you asked the model for \emph{and which
+sections of this paper they touched}, and a numbered list of \emph{every} piece
+of wrong information it gave you, with how you spotted each one.
+
+Naming the sections is what the University's assessment directive asks for: a
+graded task must indicate, in a footnote or an appendix, which parts of it an AI
+generated or influenced.
+
+\textbf{The total you reach here is the numerator of
+Section~\ref{sec:payback}}, so compute it before you write that section.
+
+Copy the empty block below once per model and fill it in. The two entries that
+follow it are worked examples. They disappear with the guidance.}
+
+\noindent\textbf{AI model:} <model and version> \\
+\textbf{Interaction:} <chat or agentic> \\
+\textbf{Prompts:} <n> \\
+\textbf{Input tokens:} <n> \quad \textbf{Output tokens:} <n> \\
+\textbf{Energy factor:} 1.03 Wh per 1000 output tokens \\
+\textbf{Grid factor:} <value> gCO\textsubscript{2}e per kWh, <source>, read on
+<date> \\
+\textbf{Estimated:} <value> gCO\textsubscript{2}e \\
+\textbf{Comparable to:} <value> hours of a 5\,W LED, or <value> km in a small
+petrol car
+
+\textbf{Kinds of task, and which sections they touched:} <...>
+
+\textbf{Wrong information:} <numbered list, or ``none''>
+
+\ifguidance
+
+\noindent\textbf{AI model:} ChatGPT, GPT-5.6 Sol \\
+\textbf{Interaction:} chat \\
+\textbf{Prompts:} 74 \\
+\textbf{Input tokens:} 96\,400 \quad \textbf{Output tokens:} 38\,200 \\
+\textbf{Energy factor:} 1.03 Wh per 1000 output tokens \\
+\textbf{Grid factor:} <value> gCO\textsubscript{2}e per kWh, <source>, read on
+<date> \\
+\textbf{Estimated:} <value> gCO\textsubscript{2}e \\
+\textbf{Comparable to:} <value> hours of a 5\,W LED, or <value> km in a small
+petrol car
+
+\textbf{Kinds of task, and which sections they touched:} teaching me the concepts
+I had not understood, such as what the inventory holds and what the impact
+assessment adds to it (III.B, III.C); reviewing the prose of the whole paper;
+checking the arithmetic of III.C and V.
+
+\textbf{Wrong information:}
+\begin{enumerate}
+\item it proposed ``the functional unit is the code'', which is wrong: it is one
+  run of that code under the conditions of Section~\ref{sec:goalscope}. I kept my
+  own sentence.
+\item it gave a Luxembourg grid factor with no source. I replaced it with the
+  one I had read myself. I checked the basis.
+\item it offered a reference with the DOI \texttt{10.1109/JXXQ.2024.193422}. I
+  checked it on doi.org, it did not resolve, and the publication does not
+  exist. I dropped the reference.
+\end{enumerate}
+
+\medskip
+\noindent\textbf{AI model:} DeepSeek V4-Flash, pinned as
+\texttt{deepseek/deepseek-v4-flash-0731} \\
+\textbf{Interaction:} agentic, through OpenCode with the course OpenRouter key \\
+\textbf{Prompts:} 212 requests over 9 sessions \\
+\textbf{Input tokens:} 5\,140\,000 \quad \textbf{Output tokens:} 213\,000 \\
+\textbf{Energy factor:} 1.03 Wh per 1000 output tokens \\
+\textbf{Grid factor:} <value> gCO\textsubscript{2}e per kWh, <source>, read on
+<date> \\
+\textbf{Estimated:} <value> gCO\textsubscript{2}e \\
+\textbf{Comparable to:} <value> hours of a 5\,W LED, or <value> km in a small
+petrol car
+
+\textbf{Kinds of task, and which sections they touched:} applying the
+optimisations of Section~\ref{sec:optimisation} to the job (IV.B); writing the
+script that carries the method to any job (IV.D); re-running the measurement
+protocol after each change (IV.C).
+
+\textbf{Wrong information:}
+\begin{enumerate}
+\item it reported that the job had run five times, when four of the five had
+  failed at submission. \texttt{sacct} showed four \texttt{FAILED} lines and one
+  \texttt{COMPLETED}.
+\item it claimed a change had cut the walltime, but the two runs had been given
+  different inputs. I re-ran both with the fixed input of
+  Section~\ref{sec:lci}.
+\item it used an \texttt{sacct} field that does not exist. The command errored.
+  The field is in no page of its documentation.
+\end{enumerate}
+
+\fi
+
+\end{document}
