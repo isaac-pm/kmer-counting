@@ -3,3 +3,5 @@ job/data/M_abscessus_HiSeq_10M.fa.gz
 
 # Job outputs
 *.out
+kmer-baseline-*.log
+job/results/
