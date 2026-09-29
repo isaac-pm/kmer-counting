@@ -620,6 +620,32 @@ Section~\ref{sec:payback}}, so compute it before you write that section.
 Copy the empty block below once per model and fill it in. The two entries that
 follow it are worked examples. They disappear with the guidance.}
 
+\noindent\textbf{AI model:} Claude Opus 5.5 (\texttt{claude-opus-5-5}) \\
+\textbf{Interaction:} chat, through the Claude desktop app \\
+\textbf{Prompts:} 17 \\
+\textbf{Input tokens:} 13\,418\,158, mostly re-read context \\
+\textbf{Output tokens:} 88\,944 \\
+\textbf{Energy factor:} 1.03 Wh per 1000 output tokens, so 91.6 Wh \\
+\textbf{Estimated:} converted to gCO\textsubscript{2}e with the grid factor
+declared in Section~\ref{sec:lcia}
+
+\textbf{Kinds of task, and which sections they touched:} I used the chat as a
+guide while I set up the repository and the job, and then for general
+corrections and fact checking of Sections III.A and III.B and of the
+references. All the text was spell-checked and proofread with it. The choices
+of scope, boundary and measurement were mine, taken step by step with the
+chat.
+
+\textbf{Wrong information:}
+\begin{enumerate}
+\item it split the commit hash of the job wrongly when breaking it over lines.
+  I compared it with the repository and corrected it.
+\item it described the end-of-life treatment of the cut-off model wrongly. I
+  rewrote the sentence.
+\item some reference details were wrong: the release year of ecoinvent 3.11 and
+  the data year of the EU PUE. I checked each reference at its source.
+\end{enumerate}
+
 % Blank entry: hidden until filled in, then move it out of the \ifguidance.
 \ifguidance
 \noindent\textbf{AI model:} <model and version> \\

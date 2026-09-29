@@ -43,39 +43,44 @@ H.~Li, ``kmer-cnt: Code examples of fast and simple k-mer counters for tutorial
   system,'' ULHPC Technical Documentation,
   \url{https://hpc-docs.uni.lu/systems/aion/compute/},
   \url{https://hpc-docs.uni.lu/systems/aion/timeline/},
-  \url{https://hpc-docs.uni.lu/filesystems/gpfs/}, 2026, university of
-  Luxembourg. Accessed 29 September 2026.
+  \url{https://hpc-docs.uni.lu/filesystems/gpfs/}, 2026, {University of
+  Luxembourg}. Accessed 29 September 2026.
 
 \bibitem{ipcc2021}
 P.~Forster, T.~Storelvmo, K.~Armour, W.~Collins, J.-L. Dufresne, D.~Frame,
   D.~J. Lunt, T.~Mauritsen, M.~D. Palmer, M.~Watanabe, M.~Wild, and H.~Zhang,
-  ``The earth's energy budget, climate feedbacks, and climate sensitivity,'' in
-  \emph{Climate Change 2021: The Physical Science Basis. Contribution of
+  ``The {Earth's} energy budget, climate feedbacks, and climate sensitivity,''
+  in \emph{Climate Change 2021: The Physical Science Basis. Contribution of
   Working Group I to the Sixth Assessment Report of the Intergovernmental Panel
   on Climate Change}.\hskip 1em plus 0.5em minus 0.4em\relax Cambridge, UK and
   New York, NY, USA: Cambridge University Press, 2021, pp. 923--1054.
 
 \bibitem{lannelongue2021}
-L.~Lannelongue, J.~Grealey, and M.~Inouye, ``Green algorithms: Quantifying the
-  carbon footprint of computation,'' \emph{Advanced Science}, vol.~8, no.~12,
-  p. 2100707, 2021.
+L.~Lannelongue, J.~Grealey, and M.~Inouye, ``{Green Algorithms}: Quantifying
+  the carbon footprint of computation,'' \emph{Advanced Science}, vol.~8,
+  no.~12, p. 2100707, 2021.
 
 \bibitem{ecoinvent311}
 {ecoinvent Association}, ``ecoinvent database version 3.11, system model
   allocation, cut-off by classification,'' ecoQuery,
   \url{https://ecoquery.ecoinvent.org/3.11/cutoff/dataset/3193/impact_assessment},
-  2025, dataset: computer production, desktop, without screen (GLO). Accessed
-  29 September 2026.
+  2024, dataset: computer production, desktop, without screen (GLO). Released
+  20 November 2024. Accessed 29 September 2026.
 
 \bibitem{dellr7525}
-{Dell Technologies}, ``Full {LCA} of {PowerEdge} {R6515/R7515/R6525/R7525},''
-  \url{https://www.delltechnologies.com/asset/en-us/products/servers/technical-support/full-lca-of-dell-severs-r6515-r7515-r6525-r7525.pdf},
-  table 4-5. Accessed 29 September 2026.
+\BIBentryALTinterwordspacing
+{Sphera Solutions}, ``Life cycle assessment -- {Dell} servers {R6515}, {R7515},
+  {R6525}, {R7525},'' Prepared on behalf of Dell Technologies, Report v1.0,
+  Feb. 2021, table 4-5, p.~47. Accessed 29 September 2026. [Online]. Available:
+  \url{https://www.delltechnologies.com/asset/en-us/products/servers/technical-support/full-lca-of-dell-severs-r6515-r7515-r6525-r7525.pdf}
+\BIBentrySTDinterwordspacing
 
 \bibitem{eudc2025}
-{European Commission}, ``Assessment of the energy performance and
-  sustainability of data centres in the {EU}: First technical report,''
-  Publications Office of the European Union, Luxembourg, Tech. Rep., 2025,
-  prepared by EY, AIT and Borderstep. Accessed 29 September 2026.
+F.~Heatubun, D.~Dragan, M.~Bolchi, and M.~{Lopes Bautista}, ``Assessment of the
+  energy performance and sustainability of data centres in {EU}: First
+  technical report,'' European Commission, Directorate-General for Energy;
+  Publications Office of the European Union, Luxembourg, Tech. Rep., Jul. 2025,
+  prepared by EY with Borderstep and AIT. Figure~6, p.~34: EU average PUE 1.36
+  for 2023 data. Accessed 29 September 2026.
 
 \end{thebibliography}

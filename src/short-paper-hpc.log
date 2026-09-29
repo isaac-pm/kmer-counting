@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.22.0 (TeX Live 2025/Debian)  (format=lualatex 2026.9.29)  29 SEP 2026 15:33
+This is LuaHBTeX, Version 1.22.0 (TeX Live 2025/Debian)  (format=lualatex 2026.9.29)  29 SEP 2026 16:06
  restricted system commands enabled.
 **short-paper-hpc.tex
 (./short-paper-hpc.tex
@@ -440,18 +440,15 @@ Underfull \hbox (badness 10000) in paragraph at lines 35--40
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 71--74
-[]\T1/ptm/m/n/8 Dell Tech-nolo-gies, ``Full LCA of Pow-erEdge
+Underfull \hbox (badness 2020) in paragraph at lines 42--48
+\T1/ptm/m/n/8 https://hpc-[]docs.uni.lu/^^\lesystems/gpfs/$, 2026, Uni-ver-sity
+ of Lux-em-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 71--74
-\T1/ptm/m/n/8 R6515/R7515/R6525/R7525,'' $https://www.delltechnologies.
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 71--74
-\T1/ptm/m/n/8 com/asset/en-[]us/products/servers/technical-[]support/
+Underfull \hbox (badness 3343) in paragraph at lines 72--77
+\T1/ptm/m/n/8 able: $https://www.delltechnologies.com/asset/en-[]us/products/se
+rvers/
  []
 
 ) [3] [4]
@@ -477,12 +474,12 @@ L3 programming layer <2026-01-19>
 )
 
 Here is how much of LuaTeX's memory you used:
- 4210 strings out of 476076
+ 4212 strings out of 476076
  125007,460012 words of node,token memory allocated
- 943 words of node memory still in use:
-   6 hlist, 2 vlist, 2 rule, 2 glue, 99 kern, 55 glue_spec, 1 write nodes
-   avail lists: 2:22,3:531,4:27,5:488,6:57,7:14690,8:131,9:500,10:23,11:875
- 26383 multiletter control sequences out of 65536+600000
+ 978 words of node memory still in use:
+   6 hlist, 2 vlist, 2 rule, 2 glue, 106 kern, 55 glue_spec, 1 write nodes
+   avail lists: 2:22,3:551,4:27,5:494,6:57,7:14690,8:131,9:500,10:23,11:875
+ 26385 multiletter control sequences out of 65536+600000
  185 fonts using 7654267 bytes
  57i,12n,64p,366b,342s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/t
@@ -499,7 +496,7 @@ xmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts
 /type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times
 /utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></u
 sr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on short-paper-hpc.pdf (5 pages, 153543 bytes).
+Output written on short-paper-hpc.pdf (5 pages, 163997 bytes).
 
 PDF statistics: 81 PDF objects out of 1000 (max. 8388607)
  58 compressed objects within 1 object stream

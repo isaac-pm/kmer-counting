@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex short-paper-hpc"] 1790688805.59893 "short-paper-hpc.aux" "short-paper-hpc.bbl" "short-paper-hpc" 1790688805.96094 0
-  "./refs.bib" 1790688718.02158 3805 4fc499f18307409c0fd14229ebdd5279 ""
+["bibtex short-paper-hpc"] 1790690765.49958 "short-paper-hpc.aux" "short-paper-hpc.bbl" "short-paper-hpc" 1790690765.86365 0
+  "./refs.bib" 1790690231.61403 3961 b6d4990a5fc5afea7e1aa28ba218c729 ""
   "/usr/share/texlive/texmf-dist/bibtex/bst/ieeetran/IEEEtran.bst" 1440712899 57748 7c8250ecf02814ce6ddc0cdbb63df1dd ""
-  "short-paper-hpc.aux" 1790688805.8791 4349 fb2c0e2e0ded1a42ae277762d6f1516d "lualatex"
+  "short-paper-hpc.aux" 1790690765.78522 4349 fb2c0e2e0ded1a42ae277762d6f1516d "lualatex"
   (generated)
   "short-paper-hpc.bbl"
   "short-paper-hpc.blg"
   (rewritten before read)
-["lualatex"] 1790688805.61566 "short-paper-hpc.tex" "short-paper-hpc.pdf" "short-paper-hpc" 1790688805.96113 0
+["lualatex"] 1790690765.51647 "short-paper-hpc.tex" "short-paper-hpc.pdf" "short-paper-hpc" 1790690765.86386 0
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/courier/pcrr8r.tfm" 1136768653 1292 bd42be2f344128bff6d35d98474adfe3 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/courier/pcrr8t.tfm" 1136768653 1384 4632f5e54900a7dadbb83f555bc61e56 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/courier/pcrrc8t.tfm" 1136768653 1400 117a19289003b123eadbb781b106b7a9 ""
@@ -106,9 +106,9 @@
   "/usr/share/texlive/texmf-dist/tex/luatex/lua-uni-algos/lua-uni-stage-tables.lua" 1756668036 9371 89eb22947a99a1769dcef3c53305728d ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1790674694 128227 ed67923a37f7748d267799454bc1f95b ""
   "/var/lib/texmf/web2c/luahbtex/lualatex.fmt" 1790674710 5655416 048b7614e2bec6dde23493ffcb8aa67b ""
-  "short-paper-hpc.aux" 1790688805.8791 4349 fb2c0e2e0ded1a42ae277762d6f1516d "lualatex"
-  "short-paper-hpc.bbl" 1790688805.61209 3583 abdb09b6fe15c232b2c3d28cd15ad56e "bibtex short-paper-hpc"
-  "short-paper-hpc.tex" 1790688729.8702 38340 0be66d8e6575318170b32cebef89a629 ""
+  "short-paper-hpc.aux" 1790690765.78522 4349 fb2c0e2e0ded1a42ae277762d6f1516d "lualatex"
+  "short-paper-hpc.bbl" 1790690765.51322 3941 af1d636531354147439e7ff222ee6075 "bibtex short-paper-hpc"
+  "short-paper-hpc.tex" 1790690753.68354 39617 c5c243eb55fed8c50ccb929c87c6535a ""
   (generated)
   "short-paper-hpc.aux"
   "short-paper-hpc.log"
