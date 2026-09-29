@@ -1,0 +1,33 @@
+UTC 2026-09-29T12:35:59Z
+$ scontrol show node aion-0127 | grep -E "NodeName=|CPUAlloc=|AvailableFeatures=|RealMemory=|State=|Partitions="
+NodeName=aion-0127 Arch=x86_64 CoresPerSocket=16 
+   CPUAlloc=128 CPUEfctv=128 CPUTot=128 CPULoad=128.09
+   AvailableFeatures=epyc,batch
+   RealMemory=224000 AllocMem=224000 FreeMem=190207 Sockets=8 Boards=1
+   State=ALLOCATED ThreadsPerCore=1 TmpDisk=0 Weight=1 Owner=N/A MCS_label=N/A
+   Partitions=batch,interactive 
+$ scontrol show node aion-0144 | grep -E "NodeName=|CPUAlloc=|AvailableFeatures=|RealMemory=|State=|Partitions="
+NodeName=aion-0144 Arch=x86_64 CoresPerSocket=16 
+   CPUAlloc=128 CPUEfctv=128 CPUTot=128 CPULoad=71.30
+   AvailableFeatures=epyc,batch
+   RealMemory=224000 AllocMem=224000 FreeMem=211182 Sockets=8 Boards=1
+   State=ALLOCATED ThreadsPerCore=1 TmpDisk=0 Weight=1 Owner=N/A MCS_label=N/A
+   Partitions=batch,interactive 
+$ scontrol update JobId=15861652 ReqNodeList=aion-0144
+$ scontrol update JobId=15861654 ReqNodeList=aion-0144
+$ scontrol update JobId=15861656 ReqNodeList=aion-0144
+$ scontrol update JobId=15861658 ReqNodeList=aion-0144
+$ scontrol update JobId=15861660 ReqNodeList=aion-0144
+$ scontrol update JobId=15861674 ReqNodeList=aion-0144
+$ squeue -j 15861652,15861654,15861656,15861658,15861660,15861674 -o "%i|%T|%N|%R"
+JOBID|STATE|NODELIST|NODELIST(REASON)
+15861652|PENDING||(None)
+15861674|PENDING||(None)
+15861660|PENDING||(None)
+15861658|PENDING||(None)
+15861656|PENDING||(None)
+15861654|PENDING||(None)
+$ squeue --start -j 15861652 -o "%i|%T|%S|%R"
+JOBID|STATE|START_TIME|NODELIST(REASON)
+15861652|PENDING|2026-09-29T16:31:41|(None)
+UTC 2026-09-29T12:35:59Z

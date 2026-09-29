@@ -1,0 +1,6 @@
+UTC 2026-09-29T13:18:22Z
+$ sacct -j 15861674 -P --format=JobID,JobName,User,Partition,NodeList,AllocNodes,AllocCPUS,ReqMem,MaxRSS,Elapsed,TotalCPU,ConsumedEnergy,ConsumedEnergyRaw,MaxDiskRead,MaxDiskWrite,State,ExitCode
+JobID|JobName|User|Partition|NodeList|AllocNodes|AllocCPUS|ReqMem|MaxRSS|Elapsed|TotalCPU|ConsumedEnergy|ConsumedEnergyRaw|MaxDiskRead|MaxDiskWrite|State|ExitCode
+15861674|kmer-energy-idle|ipalmamedina|batch|aion-0144|1|128|224000M||00:01:01|00:00.707|||||COMPLETED|0:0
+15861674.batch|batch|||aion-0144|1|128||39728K|00:01:01|00:00.707|||14.53M|0.01M|COMPLETED|0:0
+15861674.extern|extern|||aion-0144|1|128|||00:01:01|00:00:00|||||COMPLETED|0:0

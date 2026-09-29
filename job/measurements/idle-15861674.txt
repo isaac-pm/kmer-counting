@@ -1,0 +1,15 @@
+UTC start: 2026-09-29T13:16:41Z
+Node: aion-0144
+Command: perf stat -a -e power/energy-pkg/ sleep 60
+
+ Performance counter stats for 'system wide':
+
+   <not supported> Joules power/energy-pkg/u                                          
+
+      60.001023582 seconds time elapsed
+
+UTC end: 2026-09-29T13:17:41Z
+RAPL package 0: before=5917094161 after=11429480583 range=65532610987 delta=5512386422 uJ
+RAPL package 1: before=22809438657 after=28255764714 range=65532610987 delta=5446326057 uJ
+RAPL CPU package total: 10958712479 uJ
+RAPL CPU package total: 10958.712 J; average: 182.645 W

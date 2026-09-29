@@ -6,3 +6,6 @@ job/data/M_abscessus_HiSeq_10M.fa.gz
 kmer-baseline-*.log
 kmer-accounting-*.log
 job/results/
+
+# LaTeX build files (latexmk aux_dir)
+.aux/

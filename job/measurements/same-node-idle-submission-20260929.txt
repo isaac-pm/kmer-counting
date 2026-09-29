@@ -1,0 +1,3 @@
+UTC 2026-09-29T12:00:21Z
+$ sbatch --parsable --dependency=afterany:15861660 -w aion-0127 job/measure-idle-energy.sh
+15861674

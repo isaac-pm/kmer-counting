@@ -1,0 +1,38 @@
+## Probe run 2026-09-29T11:52:34Z on aion-0234, job 15861635
+## 1. Slurm energy plugin (none => ConsumedEnergy stays empty)
+AcctGatherEnergyType    = acct_gather_energy/rapl
+AcctGatherNodeFreq      = 25 sec
+JobAcctGatherType       = jobacct_gather/cgroup
+## 2. Kernel powercap / RAPL files and their permissions
+-r--r--r--. 1 root root 4096 Sep  8 09:10 /sys/class/powercap/intel-rapl:0:0/energy_uj
+-r--r--r--. 1 root root 4096 Sep  8 09:10 /sys/class/powercap/intel-rapl:0/energy_uj
+-r--r--r--. 1 root root 4096 Sep  8 09:10 /sys/class/powercap/intel-rapl:1:0/energy_uj
+-r--r--r--. 1 root root 4096 Sep  8 09:10 /sys/class/powercap/intel-rapl:1/energy_uj
+/sys/class/powercap/intel-rapl:0:0/energy_uj: 49840811490
+/sys/class/powercap/intel-rapl:0/energy_uj: 32422228049
+/sys/class/powercap/intel-rapl:1:0/energy_uj: 58431743114
+/sys/class/powercap/intel-rapl:1/energy_uj: 41027067629
+## 3. perf energy events
+2
+  power/energy-cores/                                [Kernel PMU event]
+  power/energy-gpu/                                  [Kernel PMU event]
+  power/energy-pkg/                                  [Kernel PMU event]
+  power/energy-psys/                                 [Kernel PMU event]
+  power/energy-ram/                                  [Kernel PMU event]
+
+   <not supported> Joules power/energy-pkg/u                                          
+
+       5.001004885 seconds time elapsed
+
+## 4. Modules that could read counters
+no likwid module
+## 5. Node power sensors (usually root only)
+ls: cannot access '/sys/class/hwmon/*/power*_input': No such file or directory
+/usr/bin/ipmitool
+UTC supplementary 2026-09-29T11:56:00Z
+$ cat /sys/class/powercap/intel-rapl:{0,1}/name
+package-0
+package-1
+$ command -v likwid-powermeter
+$ timeout 5 ipmitool sdr type "Power Supply"
+Could not open device at /dev/ipmi0 or /dev/ipmi/0 or /dev/ipmidev/0: No such file or directory

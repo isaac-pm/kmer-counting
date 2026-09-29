@@ -1,0 +1,19 @@
+UTC start 2026-09-29T11:53:49Z
+$ cat /sys/class/powercap/intel-rapl:{0,1}/energy_uj
+39308688309
+47503799292
+$ perf stat -a -e power/energy-pkg/ sleep 60
+
+ Performance counter stats for 'system wide':
+
+   <not supported> Joules power/energy-pkg/u                                          
+
+      60.001167562 seconds time elapsed
+
+UTC end 2026-09-29T11:54:49Z
+$ cat /sys/class/powercap/intel-rapl:{0,1}/energy_uj
+44848501627
+52681312193
+$ cat /sys/class/powercap/intel-rapl:{0,1}/max_energy_range_uj
+65532610987
+65532610987

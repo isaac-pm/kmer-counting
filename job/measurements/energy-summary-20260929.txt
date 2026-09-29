@@ -1,0 +1,16 @@
+UTC calculation: 2026-09-29T13:19:15+00:00
+$ python3 job/measurements/energy-calculation.py
+Source: job/measurements/baseline-JOBID.txt (RAPL total, perf elapsed, SHA-256)
+Source: job/measurements/sacct-JOBID.txt (State, ExitCode, NodeList, Elapsed)
+Source: job/measurements/idle-15861674.txt (RAPL total, perf elapsed)
+Idle: 10958.712479 J / 60.001023582 s = 182.642092 W
+JOBID|Slurm elapsed|perf elapsed s|package J|idle-subtracted package J|output SHA-256
+15861652|00:06:04|360.710762899|67833.832999|1952.864597|06a32de77200121a397050e015a257953dc956b7854027a1ed73b15afc12bf42
+15861654|00:05:59|357.813913003|67214.858981|1862.977305|06a32de77200121a397050e015a257953dc956b7854027a1ed73b15afc12bf42
+15861656|00:05:59|357.580222570|67128.799238|1819.599271|06a32de77200121a397050e015a257953dc956b7854027a1ed73b15afc12bf42
+15861658|00:06:05|362.739772062|67941.414700|1689.863819|06a32de77200121a397050e015a257953dc956b7854027a1ed73b15afc12bf42
+15861660|00:06:08|366.383708623|68827.186916|1910.099838|06a32de77200121a397050e015a257953dc956b7854027a1ed73b15afc12bf42
+Median package energy: 67833.832999 J
+Median idle-subtracted package energy: 1862.977305 J
+Idle subtraction assumes the subsequent 60-second idle rate applies during each run.
+RAPL measures CPU packages, not whole-node or facility electricity.

@@ -1,0 +1,6 @@
+UTC 2026-09-29T11:59:15Z
+$ sacct -j 15861635 -P --format=JobID,JobName,NodeList,Elapsed,ConsumedEnergy,ConsumedEnergyRaw,State,ExitCode
+JobID|JobName|NodeList|Elapsed|ConsumedEnergy|ConsumedEnergyRaw|State|ExitCode
+15861635|interactive|aion-0234|00:05:31|||COMPLETED|0:0
+15861635.extern|extern|aion-0234|00:05:31|||COMPLETED|0:0
+15861635.0|bash|aion-0234|00:05:30|||COMPLETED|0:0

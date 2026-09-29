@@ -1,0 +1,30 @@
+UTC 2026-09-29T11:56:42Z
+$ git rev-parse HEAD
+ccb8cb84773946b5014f561ae9329c0abde21d5e
+$ sha256sum job/run-baseline-energy.sh job/run-baseline.sh job/baseline/kc-py1.py
+0dea1b648ea429eb0ad4b058866b73f800eeeb658af6888e8a42598698af09d7  job/run-baseline-energy.sh
+f24c898bd1ebbdd32fad39e85fe69f619bdcc66b632ac50c001ebbc675ef1b8e  job/run-baseline.sh
+4628ab8d2335fbfd0da46f54dc5e8ac9b0b32e3f9df038a7993ed72ccf9d0438  job/baseline/kc-py1.py
+$ squeue -h -w aion-0127 -o "%i|%T|%N"
+15860776|RUNNING|aion-[0126-0127]
+$ sbatch --parsable --dependency=singleton -w aion-0127 job/run-baseline-energy.sh
+run 1 job ID: 15861652
+$ sbatch --parsable --dependency=afterany:15861652 job/collect-measurement.sh 15861652
+collector job ID: 15861653
+$ sbatch --parsable --dependency=singleton -w aion-0127 job/run-baseline-energy.sh
+run 2 job ID: 15861654
+$ sbatch --parsable --dependency=afterany:15861654 job/collect-measurement.sh 15861654
+collector job ID: 15861655
+$ sbatch --parsable --dependency=singleton -w aion-0127 job/run-baseline-energy.sh
+run 3 job ID: 15861656
+$ sbatch --parsable --dependency=afterany:15861656 job/collect-measurement.sh 15861656
+collector job ID: 15861657
+$ sbatch --parsable --dependency=singleton -w aion-0127 job/run-baseline-energy.sh
+run 4 job ID: 15861658
+$ sbatch --parsable --dependency=afterany:15861658 job/collect-measurement.sh 15861658
+collector job ID: 15861659
+$ sbatch --parsable --dependency=singleton -w aion-0127 job/run-baseline-energy.sh
+run 5 job ID: 15861660
+$ sbatch --parsable --dependency=afterany:15861660 job/collect-measurement.sh 15861660
+collector job ID: 15861661
+UTC 2026-09-29T11:56:42Z

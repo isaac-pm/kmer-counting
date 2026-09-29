@@ -1,0 +1,65 @@
+ecoinvent lookup — read on 2026-09-29 (Europe/Luxembourg)
+
+Database: ecoinvent 3.11, system model cut-off ("Allocation, cut-off by classification"),
+          ecoquery.ecoinvent.org, signed in as XXX.XXX.XXX@student.uni.lu (course login)
+Note: ecoQuery defaulted to 3.12 (released 2025-11-05); switched manually to 3.11 as specified.
+Search mode: "Activity" (default). Search is fuzzy; hit lists were checked on every result page.
+
+Searches and number of results:
+  "server"               -> 58 activities; server production dataset found? NO
+                            (all 6 pages scanned; no activity name contains "server";
+                             hits are fuzzy matches: router/internet access equipment, silver, purse seiner...)
+                            Also searched "server" by Product -> 32 products, none containing "server".
+  "computer production"  -> 10 activities (incl. laptop, desktop without screen, components)
+  "computer, desktop"    -> 20 activities (production, market, and "operation, ..." use-phase datasets)
+  "computer, laptop"     -> 27 activities (mostly "operation, computer, laptop, ..." use-phase datasets)
+
+Dataset 1:
+  Activity name:       computer production, desktop, without screen
+  Activity type:       Transforming activity
+  Reference product:   computer, desktop, without screen   Unit: unit
+  Geography:           GLO   Time period: 1998–2024
+  System model:        cut-off
+  LCIA method shown:   IPCC 2021  (dropdown; also offers "IPCC 2021 no LT", "IPCC 2021 (incl. biogenic CO2)")
+  Row:                 climate change: total (excl. biogenic CO2) | global warming potential (GWP100)
+  Value:               221 kg CO2-Eq per unit
+                       (incl. SLCFs variant: 223; GWP20: 248; GWP500: 211)
+  URL:                 https://ecoquery.ecoinvent.org/3.11/cutoff/dataset/3193/impact_assessment
+                       (documentation: .../dataset/3193/documentation)
+  Screenshots:         ecoinvent-screenshots/ei311_desktop_3193_header.jpg
+                       ecoinvent-screenshots/ei311_desktop_3193_IPCC2021_rows.jpg
+  Caveats (from dataset documentation):
+    - Reference machine: Pentium 4 desktop built 2002, 11.3 kg, 512 MB RAM; ecoinvent v2 data (Lehmann 2007),
+      not individually updated for v3.
+    - Scope includes packaging and "the disposal of the computer", so it is not production-only.
+
+Dataset 2:
+  Activity name:       computer production, laptop
+  Activity type:       Transforming activity
+  Reference product:   computer, laptop   Unit: unit
+  Geography:           GLO   Time period: 2011–2024
+  System model:        cut-off
+  LCIA method shown:   IPCC 2021
+  Row:                 climate change: total (excl. biogenic CO2) | global warming potential (GWP100)
+  Value:               170 kg CO2-Eq per unit
+                       (incl. SLCFs variant: 170; GWP20: 189; GWP500: 163)
+  URL:                 https://ecoquery.ecoinvent.org/3.11/cutoff/dataset/2077/impact_assessment
+  Screenshots:         ecoinvent-screenshots/ei311_laptop_2077_header.jpg
+                       ecoinvent-screenshots/ei311_laptop_2077_IPCC2021_rows.jpg
+  Caveats: 1 laptop without packaging; weighted average of Hischier (2014), Ciroth (2011),
+           Busa (2019), Apple Environment Report; includes SSD, no CD drive.
+
+Other candidates seen but not opened:
+  market for computer, desktop, without screen (GLO)  — market wrapper of Dataset 1 (adds transport)
+  power supply unit production, for desktop computer (CN, RoW) — 34.7 kg CO2-Eq/unit (search-list score)
+  hard disk drive production, for desktop computer (GLO) — 15.0 kg CO2-Eq/unit (search-list score)
+  (search-list "impact score" does not name its method; values above for Datasets 1–2 match IPCC 2021 GWP100 total)
+
+Null result:
+  "On 2026-09-29, ecoinvent 3.11 cut-off contained no server production activity.
+   Searches: 'server' (activity: 58 hits; product: 32 hits), 'computer production',
+   'computer, desktop', 'computer, laptop'. Closest datasets: 'computer production,
+   desktop, without screen' (GLO, 221 kg CO2-eq/unit, IPCC 2021 GWP100) and
+   'computer production, laptop' (GLO, 170 kg CO2-eq/unit)."
+
+Licensing: screenshots contain ecoinvent data — keep them out of the repo.

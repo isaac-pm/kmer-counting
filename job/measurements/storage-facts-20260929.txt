@@ -1,0 +1,12 @@
+UTC 2026-09-29T11:43:29Z
+$ stat -c "%s %n" job/results/baseline-15860349.tsv job/data/M_abscessus_HiSeq_10M.fa.gz
+1972 job/results/baseline-15860349.tsv
+187693955 job/data/M_abscessus_HiSeq_10M.fa.gz
+$ df -hT .
+Filesystem     Type  Size  Used Avail Use% Mounted on
+aiongpfs       gpfs  3.0P  1.6P  1.4P  54% /mnt/aiongpfs
+$ findmnt -T .
+TARGET        SOURCE   FSTYPE OPTIONS
+/mnt/aiongpfs aiongpfs gpfs   rw,relatime,seclabel
+$ pwd -P
+/mnt/aiongpfs/users/ipalmamedina/kmer-counting

@@ -1,0 +1,16 @@
+NodeName=aion-0144 Arch=x86_64 CoresPerSocket=16 
+   CPUAlloc=128 CPUEfctv=128 CPUTot=128 CPULoad=1.61
+   AvailableFeatures=epyc,batch
+   ActiveFeatures=epyc,batch
+   Gres=(null)
+   NodeAddr=aion-0144 NodeHostName=aion-0144 Version=25.11.8
+   OS=Linux 4.18.0-553.146.1.el8_10.x86_64 #1 SMP Tue Jul 21 15:46:30 UTC 2026 
+   RealMemory=224000 AllocMem=224000 FreeMem=221043 Sockets=8 Boards=1
+   State=ALLOCATED ThreadsPerCore=1 TmpDisk=0 Weight=1 Owner=N/A MCS_label=N/A
+   Partitions=batch,interactive 
+   BootTime=2026-09-10T04:35:12 SlurmdStartTime=2026-09-10T12:29:20
+   LastBusyTime=2026-09-29T15:16:40 ResumeAfterTime=None
+   CfgTRES=cpu=128,mem=224000M,billing=197
+   AllocTRES=cpu=128,mem=224000M
+   CurrentWatts=n/a AveWatts=n/a
+

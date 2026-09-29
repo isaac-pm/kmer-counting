@@ -26,17 +26,17 @@
 % \guidancefalse before you submit: the PDF you hand in carries no guidance.
 % The notes add pages, so that switch is also how you measure your real length.
 \newif\ifguidance
-\guidancetrue
+\guidancefalse
 \newcommand{\guidance}[1]{\ifguidance{\itshape\small #1\par\medskip}\fi}
 
 \begin{document}
 
-\title{Life Cycle Assessment of \textit{<your HPC job>}: Carbon Payback of an AI-Assisted Optimisation}
+\title{Life Cycle Assessment of Exact 31-mer Counting on an HPC Node: Carbon Payback of an AI-Assisted Optimisation}
 
-\author{\IEEEauthorblockN{<Your Full Name>}
-\IEEEauthorblockA{Master in Information and Computer Sciences\\
+\author{\IEEEauthorblockN{Isaac Palma-Medina}
+\IEEEauthorblockA{Master in High Performance Computing\\
 University of Luxembourg\\
-<your.name>@student.uni.lu\\[2pt]
+isaac.palma.001@student.uni.lu\\[2pt]
 % The page minimum, printed here so it is full width and survives \guidancefalse.
 \small\itshape Minimum of 4 double-column pages, excluding guidance text, references and appendices.\normalfont\upshape\\[2pt]
 % Build stamp: the date this file was last compiled.
@@ -104,9 +104,6 @@ are there, every one is verified, and the section situates what you did
 against them}. Your reviewers will tell you what is missing, and
 \textbf{v2 is where that section earns its keep}.}
 
-This is how you cite~\cite{example2025}. Delete this sentence and the
-matching entry in \texttt{refs.bib} once you have real references.
-
 % ---------------------------------------------------------------------
 \section{Life Cycle Assessment}
 \guidance{The five subsections below follow Session 3 with respect to
@@ -114,70 +111,217 @@ ISO 14040~\cite{iso14040} and ISO 14044~\cite{iso14044}. In each subsection,
 introduce its intention concisely, then apply it to your job.}
 
 \subsection{Goal and scope definition}\label{sec:goalscope}
-\guidance{\emph{Your functional unit, in one sentence}, answering the
-questions of Session 3 that describe the object: the \emph{job} (one code, one
-commit, one input), the \emph{user} who submits it, the \emph{cluster}, the
-\emph{partition} and the \emph{hardware} it runs on, and the \emph{walltime}
-with the \emph{resources} it holds and how many runs it counts. A reader who
-follows that sentence measures what you measured.
+The goal and scope definition fixes what is studied, the functional unit every
+later figure refers to, the boundary of the system and the method that turns
+inventory flows into an impact~\cite{iso14040,iso14044}.
 
-\emph{Then the criterion, and the two names behind it.} One criterion: a carbon
-footprint in CO\textsubscript{2}e. The characterisation method is IPCC 2021 and
-the indicator is GWP100, which are the conventions of this course. Name both
-here, and name them again in Section~\ref{sec:lcia}.
+\emph{Goal.} This study quantifies the carbon footprint of one execution of a
+baseline 31-mer counting job. That footprint is the reference against which
+the AI-assisted optimisation of Section~\ref{sec:optimisation} and its carbon
+payback in Section~\ref{sec:payback} are measured.
 
-\emph{Then the boundary.} You assess only what you can access: the nodes the
-job holds and for how long, and the site overhead at the PUE you declare. Your
-own laptop and everything the job does not reserve stay outside, and you say so.
-Say which life cycle phases you include and which you exclude.
+\emph{The job.} The code is \texttt{kc-py1.py} from the public repository
+\texttt{lh3/kmer-cnt}~\cite{kmercnt}, frozen at commit
+\texttt{e2574719cfb7\allowbreak 84915d80eb58\allowbreak 28e78dfae4cf\allowbreak dd7b}.
+It is a single-threaded Python~3 program. It reads FASTA from standard input and
+counts every canonical 31-mer, the lexicographically smaller of a 31-mer and its
+reverse complement. It skips any 31-mer that contains \texttt{N}. It prints a
+histogram with 255 lines, one per count from 1 to 255, and pools every count
+above 255 into the last line. The input is
+\texttt{M\_abscessus\_HiSeq\_10M.fa.gz} from the repository's v0.1
+release~\cite{kmercnt}: 187\,693\,955~bytes, SHA-256
+\texttt{dd2ef49aebab\allowbreak fed1574b55fd\allowbreak 002025f29b2f\allowbreak da88c70b2095\allowbreak f5e1b3a822ce\allowbreak e736}.
+It is decompressed on the fly by \texttt{gzip}. The program upper-cases only the
+last record of its input. No sequence line of this input holds a lower-case
+base (checked on 28~September~2026), so this does not affect the result. The job
+is submitted with the Slurm script \texttt{run-baseline.sh} of the project
+repository at commit
+\texttt{253d93ec726b\allowbreak 82670c8f4b84\allowbreak da20e9528c9a\allowbreak 59ef}.
+Every run writes the same 1\,972-byte histogram, SHA-256
+\texttt{06a32de77200\allowbreak 121a397050e0\allowbreak 15a257953dc9\allowbreak 56b7854027a1\allowbreak ed73b15afc12\allowbreak bf42}.
 
-\emph{Then your four components}, the ones Section~\ref{sec:lci} inventories:
-the compute nodes, the interconnect, the storage, and the site. Capping the
-study at four is a scope decision, so it belongs here, each one named with what
-it covers.}
+\emph{The machine.} The job runs on the Aion cluster of the University of
+Luxembourg HPC platform, partition \texttt{batch}, QoS \texttt{normal}, on the
+regular compute node \texttt{aion-0127}. An Aion node holds two AMD EPYC~7H12
+processors of 64~cores each, 256~GB of DDR4 memory, a 480~GB local SSD and one
+HDR100 InfiniBand port~\cite{ulhpcaion}. The loaded modules are
+\texttt{env/release/default} and \texttt{lang/Python/3.11.5-GCCcore-13.2.0}
+(Python~3.11.5), as recorded in every run's log.
+
+\emph{The allocation.} Each run holds one node exclusively: one task,
+128~cores, all the memory Slurm can reserve on the node
+(\texttt{-{}-mem=0}, recorded as 224\,000~MiB) and a walltime limit of
+30~minutes. The program uses one of those cores. The node is reserved
+exclusively so that no other job shares it. As a consequence, the whole node,
+not one core, is attributed to the job.
+
+\emph{The user.} The job is submitted with \texttt{sbatch} from an Aion login
+node by the author, through a standard student account.
+
+\emph{How many runs.} The functional unit is one run. Five runs are measured
+(Section~\ref{sec:lci}). The job is assumed to be executed 100~times per year,
+an assumption listed in Section~\ref{sec:threats}.
+
+\emph{Functional unit.} The GWP100 carbon footprint of one execution of
+\texttt{kc-py1.py} at commit \texttt{e2574719} of \texttt{lh3/kmer-cnt},
+counting exact canonical 31-mers in \texttt{M\_abscessus\_HiSeq\_10M.fa.gz}
+(187\,693\,955~bytes, SHA-256 \texttt{dd2ef49a\ldots e736}), submitted by a
+student user on Aion, partition \texttt{batch}, holding one exclusive regular
+node (2~$\times$~AMD EPYC~7H12, 128~cores, 224\,000~MiB reservable memory) for
+a median walltime of 368~s.
+
+\emph{Method.} One criterion: a carbon footprint in CO\textsubscript{2}e.
+The characterisation method is IPCC~2021~\cite{ipcc2021} and the indicator is
+GWP100.
+
+\emph{Boundary.} Inside the boundary are the node the job holds for its
+walltime, and the share of the interconnect, the storage and the site that
+serve it. The last three enter through the power usage effectiveness (PUE)
+declared in Section~\ref{sec:lci}. Outside the boundary are the author's laptop,
+the login node, the network between laptop and cluster, the one-off download of
+the input, the development of the code, and every node and job the allocation
+does not reserve.
+
+\emph{Life cycle phases.} For the compute node, the study keeps production,
+including the extraction of raw materials that cradle-to-gate data contain, and
+use. For the interconnect, the storage and the site, it keeps use only, through
+the declared PUE. End of life is not inventoried separately: the disposal route
+of Aion's hardware is not published. One of the candidate hardware datasets
+of Section~\ref{sec:lci} nonetheless includes disposal. That mismatch is listed
+in Section~\ref{sec:threats}.
+
+\emph{Components.} The study is capped at four components, which
+Section~\ref{sec:lci} inventories in this order:
+(1)~the \emph{compute node}: its electricity during the walltime and a share of
+its manufacture;
+(2)~the \emph{interconnect}: the HDR100 InfiniBand fabric that carries the
+job's reads and writes between the node and shared storage;
+(3)~the \emph{storage}: the shared GPFS file system that holds the input, the
+code and the output;
+(4)~the \emph{site}: cooling and power distribution around the machine.
 
 \subsection{Life cycle inventory}\label{sec:lci}
-\guidance{The quantities your assessment runs on, and how you obtained
-them. Every number here is a physical flow: grams belong to
-Section~\ref{sec:lcia}.
+The inventory lists the physical flows the assessment runs on, and how each
+was obtained. It holds no grams: those belong to Section~\ref{sec:lcia}. Every
+entry is gathered in Table~\ref{tab:inventory} in Appendix~A, with its source
+and the date it was read. The raw scheduler records, logs and commands are kept
+in the project repository.
 
-\emph{The measurement.} The commit, the fixed input, an exclusive node so
-nothing else shares it, \emph{five} runs with all five kept and the median
-reported, and the exact fields you read. Say whether the caches
-were warm when each run started, and give the spread from your fastest run to
-your slowest. Whether the first run stands apart from the four that follow is
-something your own five runs show. A reader who follows this paragraph gets your numbers
-back.
+\emph{The measurement.} The frozen commit and input of
+Section~\ref{sec:goalscope} were run five times as separate batch jobs on
+29~September~2026, submitted consecutively with
+\texttt{-{}-dependency=singleton} so that no two overlapped. Each run held its
+node exclusively, and all five landed on \texttt{aion-0127}. All five completed
+with exit code~0 and wrote identical output. All five are kept and the median
+is reported. Walltimes were 362, 364, 368, 369 and 372~s: a median of 368~s and
+a spread of 10~s from fastest to slowest. File system caches were neither reset
+nor measured. The first run is not the slowest (the third is), so these runs
+show no first-run effect, but they do not establish whether any run started
+cold. The records were read with \texttt{sacct} on 29~September~2026. The
+fields read, and why each is the quantity claimed, are:
+\texttt{Elapsed}, the time from start to end of the allocation, which is the
+walltime the node is held;
+\texttt{AllocNodes} and \texttt{AllocCPUS}, the node and cores held;
+\texttt{ReqMem}, the memory reserved;
+\texttt{MaxRSS} of the Python step, the peak resident memory the program
+touched, which agrees with the maximum resident set size that
+\texttt{/usr/bin/time -v} reports to within 0.2\,\%;
+\texttt{MaxDiskRead} and \texttt{MaxDiskWrite} of the batch and Python steps;
+and \texttt{ConsumedEnergy} and \texttt{ConsumedEnergyRaw}.
 
-\emph{One subsection per component you declared in
-Section~\ref{sec:goalscope}}, written with \texttt{\textbackslash subsubsection}
-so the four appear in order. In each: the quantity and its unit \emph{per
-functional unit}, how you obtained it, the source precise enough to be
-reopened, and the date you read it. Anything shared across many runs, a node
-bought once and used for years above all, is divided down to one run, by a rule
-you state and apply in every subsection.
+\emph{Whether an energy figure comes back.} It does not come back from the
+scheduler. On 29~September~2026, \texttt{scontrol show config} reported the
+energy plugin \texttt{acct\_gather\_energy/rapl}. Nevertheless, both energy fields
+were empty for every step of all five jobs, and for a separate interactive
+allocation checked the same day. The empty fields are missing data, not zero
+energy. The processor's own RAPL counters are readable by an ordinary user
+through \texttt{/sys/class/powercap}, while \texttt{perf} reports its package
+energy event as not supported. The job was therefore run five more times on
+29~September~2026, with the same program, input and allocation. Each run read
+both package counters directly before and after the Python step, and corrected
+for counter wrap. \texttt{aion-0127} was busy, so these five runs and an idle
+reading were moved to \texttt{aion-0144}, an identical regular node. All five
+completed with exit code~0 and wrote the same histogram, and Slurm's energy
+fields stayed empty. Over Python steps of 357.6 to 366.4~s, the two CPU packages
+drew a median of 67\,834~J (range 67\,129 to 68\,827~J), an average of 188~W.
+Read the same way for 60~s after the fifth run, the idle node drew 10\,959~J, or
+183~W. Assuming that idle rate held throughout each run, the job's activity
+adds a median of only 1\,863~J (range 1\,690 to 1\,953~J). So 97\,\% of the
+package energy is drawn by a node the job holds but barely uses. RAPL covers
+the processor packages only: memory, board, local disk, fans and network card
+are outside it, and so is the time the allocation runs outside the Python step.
+Because no instrument reaches the whole node, the node's electricity is also
+estimated with the Green Algorithms model~\cite{lannelongue2021}:
+the walltime times the power of the cores and memory held, using 280~W per
+64-core processor~\cite{ulhpcaion} and 0.3725~W per GB of memory. The whole
+256~GB installed is counted, because the exclusive allocation holds all of it.
+Counting one active core gives 36.7~kJ (0.0102~kWh) per run. Counting all
+128~allocated cores at full power gives 241~kJ (0.0670~kWh). The measured
+package energy alone, 67.8~kJ, is almost twice the first figure. So the one-core
+model understates the node, and both model figures are scenarios, not bounds.
+The measured package energy is the figure this inventory carries forward.
 
-\emph{What the job record holds.} Your scheduler recorded the physical
-quantities this inventory runs on: the hardware the job held and for how long,
-the energy it drew, the memory it reserved against the memory it touched, and
-the bytes it moved. \textbf{Name the fields you read, and say why each one is
-the quantity you claim it is.} Reserved and touched are not the same flow, and
-the gap between them is an inventory quantity of its own.
+\emph{Allocation rule.} Anything shared across many runs is divided down to one
+run by the node-seconds the job holds over the node-seconds the hardware
+delivers during its service life. For one exclusive node this is the walltime
+over the service life. The same rule is applied in every subsection below.
 
-\emph{Whether an energy figure comes back at all.} \textbf{Establish that for
-your own runs, say in one sentence how you established it, and give the date.}
-If none comes back, name the substitute you adopt, its source and what it
-leaves out. You are marked on how you determined it, never on what the machine
-answered.
+\subsubsection{Compute node}
+Operational: 67\,834~J of CPU-package electricity per run (median, RAPL), of
+which 1\,863~J is above idle, over a median walltime of 368~s,
+holding 1~node and 128~cores. Memory reserved: 224\,000~MiB (\texttt{ReqMem}),
+of the 256~GB installed~\cite{ulhpcaion}. Memory touched: 7\,760\,436~KiB, or
+7.40~GiB (median \texttt{MaxRSS}). The job therefore touches 3.4\,\% of what it
+reserves, and 211~GiB stays reserved but unused.
+Embodied: ecoinvent cut-off v3.11~\cite{ecoinvent311} holds no server
+production activity. Searches on 29~September~2026 for \emph{server} (58
+activities, 32 products), \emph{computer production}, \emph{computer, desktop}
+and \emph{computer, laptop} found none. The closest dataset is
+\emph{computer production, desktop, without screen} (GLO, 1998--2024,
+per unit). It models a 2002 single-processor desktop of 11.3~kg and includes
+packaging and disposal. Under IPCC~2021 GWP100 it carries 221~kg
+CO\textsubscript{2}e per unit. A two-socket AMD EPYC server, the Dell PowerEdge R7525, has a published production footprint of
+1\,768.4~kg CO\textsubscript{2}e, of which 854.7~kg comes from two 4~TB
+SSDs~\cite{dellr7525}. That study uses IPCC~2013 rather than IPCC~2021, and its
+server differs from an Aion blade. Neither figure describes an Aion node. Which
+one enters Section~\ref{sec:lcia}, and why, is decided there. Aion entered
+production in October--November 2021 and still runs in September
+2026~\cite{ulhpcaion}. No retirement date is published, so a service life of
+six years is assumed (Section~\ref{sec:threats}). One run then holds 368~s of
+189\,345\,600~node-seconds, a share of $1.94\times10^{-6}$ of the node.
 
-\emph{Embodied quantities} come from elsewhere: the mass or the published
-product carbon footprint of the node, its service life, and the share of it your
-run holds, which is your node-seconds over the node-seconds the machine delivers
-in that life.
+\subsubsection{Interconnect}
+The job runs on one node, so no node-to-node traffic occurs. Its only traffic
+on the HDR100 fabric (link rate~100, read with \texttt{ibstat}) is file system
+I/O. The step counters do not measure storage traffic directly. The Python
+step's \texttt{MaxDiskRead} of 680.67~MiB equals the decompressed stream that
+\texttt{gzip} writes into the pipe (713\,674\,148~bytes, or 680.61~MiB). The
+batch step's \texttt{MaxDiskWrite} of 680.72~MiB is \texttt{gzip} writing that
+same pipe. What the batch step reads beyond the pipe, about 198~MiB, is the
+179~MiB compressed input plus about 19~MiB of other files, most likely the
+loaded modules. The data read from storage per run is therefore about
+187\,693\,955~bytes plus about 19~MiB, and the data written is the
+1\,972-byte histogram plus the job log. This breakdown is inferred from the
+counters, not measured on the fabric. Runs~2 to~5 may have read the input from
+the node's page cache. The fabric's energy is not metered per job. It enters
+through the declared PUE of the site subsection.
 
-\emph{If you had to substitute, say what you used and why it holds.} A
-sourced substitute belongs here. An unsourced one is an assumption, and it
-belongs in Section~\ref{sec:threats}.}
+\subsubsection{Storage}
+The repository, input and output sit on Aion's shared GPFS file system
+(\texttt{df -T}, 29~September~2026)~\cite{ulhpcaion}. Per run, the job keeps
+the 187\,693\,955-byte input and writes the 1\,972-byte output, reading and
+writing the bytes listed under the interconnect. Storage energy is not metered
+per job. It enters through the declared PUE of the site subsection.
+
+\subsubsection{Site}
+The University of Luxembourg HPC centre publishes no PUE for Aion. This study
+therefore declares 1.36, the EU average PUE for 2023, reported in 2024 and
+published in the European Commission's first technical report on data-centre
+energy performance~\cite{eudc2025}, read on 29~September~2026. It is a regional proxy,
+not a measurement of this site. It multiplies the operational energy of the
+compute node, and covers cooling, power distribution, interconnect and storage.
+How far a different value would move the result is discussed in
+Section~\ref{sec:threats}.
 
 \subsection{Life cycle impact assessment}\label{sec:lcia}
 \guidance{Single-criteria carbon footprint: climate change only. Say so,
@@ -412,6 +556,41 @@ from the text, and place them all there.}
 \section{Figures and Tables}
 \guidance{Every figure and every table of your paper.}
 
+\begin{table*}[!t]
+\caption{Life cycle inventory of one run (Section~\ref{sec:lci}). Measured
+rows are the median of five runs on \texttt{aion-0127}, except the RAPL rows
+(\texttt{aion-0144}); all rows read on 29~September~2026 unless stated.}
+\label{tab:inventory}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Component & Quantity & Value and unit & Source & Kind \\
+\midrule
+Compute node & Walltime & 368~s (range 362--372) & \texttt{sacct} \texttt{Elapsed}, jobs 15860349--53 & measured \\
+             & Nodes, cores held & 1 node, 128 cores & \texttt{sacct} \texttt{AllocNodes}, \texttt{AllocCPUS} & measured \\
+             & Memory reserved & 224\,000~MiB & \texttt{sacct} \texttt{ReqMem} & measured \\
+             & Memory touched & 7\,760\,436~KiB (7.40~GiB) & \texttt{sacct} \texttt{MaxRSS}, step \texttt{.0} & measured \\
+             & Electricity, scheduler & none returned & \texttt{ConsumedEnergy(Raw)} empty & measured \\
+             & CPU-package energy per run & 67\,834~J (range 67\,129--68\,827) & RAPL, jobs 15861652--60 & measured \\
+             & CPU-package power, idle & 183~W (10\,959~J in 60~s) & RAPL, job 15861674 & measured \\
+             & Package energy above idle & 1\,863~J (range 1\,690--1\,953) & run $-$ idle rate $\times$ step time & derived \\
+             & Electricity, 1 core active & 36.7~kJ & Green Algorithms~\cite{lannelongue2021} & model \\
+             & Electricity, 128 cores at TDP & 241~kJ & Green Algorithms~\cite{lannelongue2021} & model \\
+             & Hardware & 2 $\times$ EPYC 7H12, 256~GB & \cite{ulhpcaion}, \texttt{lscpu} & looked up \\
+             & Manufacture, ecoinvent proxy & 221~kg CO\textsubscript{2}e per unit & \cite{ecoinvent311}, desktop without screen & looked up \\
+             & Manufacture, vendor proxy & 1\,768.4~kg CO\textsubscript{2}e per unit & \cite{dellr7525}, R7525, IPCC 2013 & looked up \\
+             & Service life & 6~years & Section~\ref{sec:threats} & assumption \\
+             & Share per run & $1.94\times10^{-6}$ & 368~s / 189\,345\,600~s & derived \\
+Interconnect & Bytes read from storage & $\approx$187.7~MB + 19~MiB & \texttt{MaxDiskRead}, batch minus pipe & inferred \\
+             & Bytes written to storage & 1\,972~B + log & \texttt{stat} of output & measured \\
+Storage      & Input stored & 187\,693\,955~B & \texttt{stat}, SHA-256 checked (28 Sep) & measured \\
+             & Output stored & 1\,972~B & \texttt{stat} & measured \\
+Site         & PUE & 1.36 & EU average, 2023 data~\cite{eudc2025} & declared proxy \\
+All          & Runs per year & 100 & Section~\ref{sec:threats} & assumption \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
 % The AI Usage Journal starts on a page of its own. \clearpage rather than
 % \newpage: in a two-column class \newpage ends the current column, while
 % \clearpage ends the whole page and flushes every float still waiting, so
@@ -441,6 +620,8 @@ Section~\ref{sec:payback}}, so compute it before you write that section.
 Copy the empty block below once per model and fill it in. The two entries that
 follow it are worked examples. They disappear with the guidance.}
 
+% Blank entry: hidden until filled in, then move it out of the \ifguidance.
+\ifguidance
 \noindent\textbf{AI model:} <model and version> \\
 \textbf{Interaction:} <chat or agentic> \\
 \textbf{Prompts:} <n> \\
@@ -456,7 +637,6 @@ petrol car
 
 \textbf{Wrong information:} <numbered list, or ``none''>
 
-\ifguidance
 
 \noindent\textbf{AI model:} ChatGPT, GPT-5.6 Sol \\
 \textbf{Interaction:} chat \\

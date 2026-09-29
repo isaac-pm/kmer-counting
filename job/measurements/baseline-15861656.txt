@@ -1,0 +1,59 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) env/release/default
+Node: aion-0144
+Job ID: 15861656
+Python 3.11.5
+env/release/default
+compiler/GCCcore/13.2.0
+lib/zlib/1.2.13-GCCcore-13.2.0
+tools/binutils/2.40-GCCcore-13.2.0
+tools/bzip2/1.0.8-GCCcore-13.2.0
+devel/ncurses/6.4-GCCcore-13.2.0
+lib/libreadline/8.2-GCCcore-13.2.0
+lang/Tcl/8.6.13-GCCcore-13.2.0
+devel/SQLite/3.43.1-GCCcore-13.2.0
+tools/XZ/5.4.4-GCCcore-13.2.0
+lib/libffi/3.4.4-GCCcore-13.2.0
+system/OpenSSL/1.1
+lang/Python/3.11.5-GCCcore-13.2.0
+RAPL start UTC: 2026-09-29T12:58:29Z
+Command: perf stat -a -e power/energy-pkg/ /usr/bin/time -v python job/baseline/kc-py1.py
+	Command being timed: "python job/baseline/kc-py1.py"
+	User time (seconds): 354.55
+	System time (seconds): 2.20
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:57.57
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 7749664
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 1459605
+	Voluntary context switches: 4
+	Involuntary context switches: 467
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+
+ Performance counter stats for 'system wide':
+
+   <not supported> Joules power/energy-pkg/u                                          
+
+     357.580222570 seconds time elapsed
+
+RAPL end UTC: 2026-09-29T13:04:27Z
+RAPL package 0: before=36758472765 after=4045036768 range=65532610987 delta=32819174990 uJ
+RAPL package 1: before=49306474698 after=18083487959 range=65532610987 delta=34309624248 uJ
+RAPL CPU package total: 67128799238 uJ
+RAPL CPU package total: 67128.799 J
+Histogram: job/results/baseline-15861656.tsv
+06a32de77200121a397050e015a257953dc956b7854027a1ed73b15afc12bf42  job/results/baseline-15861656.tsv
