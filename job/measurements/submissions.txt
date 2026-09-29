@@ -1,0 +1,10 @@
+submission_utc=2026-09-29T09:28:04Z
+commit=253d93ec726b82670c8f4b84da20e9528c9a59ef
+dd2ef49aebabfed1574b55fd002025f29b2fda88c70b2095f5e1b3a822cee736  job/data/M_abscessus_HiSeq_10M.fa.gz
+4628ab8d2335fbfd0da46f54dc5e8ac9b0b32e3f9df038a7993ed72ccf9d0438  job/baseline/kc-py1.py
+f24c898bd1ebbdd32fad39e85fe69f619bdcc66b632ac50c001ebbc675ef1b8e  job/run-baseline.sh
+Submitted batch job 15860349
+Submitted batch job 15860350
+Submitted batch job 15860351
+Submitted batch job 15860352
+Submitted batch job 15860353

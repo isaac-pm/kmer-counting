@@ -4,4 +4,5 @@ job/data/M_abscessus_HiSeq_10M.fa.gz
 # Job outputs
 *.out
 kmer-baseline-*.log
+kmer-accounting-*.log
 job/results/
