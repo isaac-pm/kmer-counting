@@ -9,3 +9,9 @@ job/results/
 
 # LaTeX build files (latexmk aux_dir)
 .aux/
+build.sh
+
+# Agents
+AGENTS.md
+CLAUDE.md
+Claude\ outputs/

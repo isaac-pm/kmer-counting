@@ -78,10 +78,52 @@ than on a job, so every convention your paper runs on is stated in the paper.}
 % ---------------------------------------------------------------------
 
 \section{Introduction}\label{sec:intro}
-\guidance{Context, the assessed job, and the research question. The
-research question is about the carbon payback of AI-assisted
-optimisation, anchored on your own job. State it explicitly, in one
-sentence, ending with a question mark.}
+Computation draws electricity, and electricity carries a carbon footprint
+that depends on where and how it is generated~\cite{lannelongue2021}. On a
+shared high-performance computing (HPC) cluster, a user does not choose the
+hardware a job draws on: a scheduler, here Slurm, grants an allocation of nodes,
+cores and memory for a walltime, and the hardware is attributed to the job for
+that time whether the program uses it or not.
+
+The object of this study is one such job. It counts the exact canonical
+31-mers of 5\,000\,000 sequencing reads of a bacterium, \emph{Mycobacterium
+abscessus} (FASTA records counted on 19~October~2026), with
+\texttt{kc-py1.py}, a single-threaded Python counter written for
+teaching~\cite{kmercnt}. A $k$-mer is a substring of length $k$ of a DNA
+sequence. Counting them is a common first step in genome analysis. The job runs
+on the Aion cluster of the University of Luxembourg, and holds one 128-core node
+exclusively while its program uses one core.
+
+The footprint of this job is invisible to its user. Slurm returns no energy
+figure for it (Section~\ref{sec:lci}), so the user sees a walltime and an exit
+code, and nothing that shows what the run costs the climate. The allocation
+shape, more than the program, may decide that cost. An optimisation guided by an
+AI coding agent also has a cost of its own: the AI assistance and the test runs
+it requires. It is worth doing only if the savings per run repay that cost
+within the life of the job.
+
+This paper answers the following research question: \emph{what is the GWP100
+carbon footprint of one run of an exact 31-mer counting job that holds an
+exclusive Aion node, which resource of that allocation carries it, and how many
+runs does an AI-assisted optimisation of that resource need to pay back its own
+footprint?} The first two parts concern one particular instance; the third
+concerns a means~\cite{shaw2003}.
+
+The contribution of this version is the baseline. It is a footprint per run
+that rests on CPU-package energy counters read by an ordinary user, because the
+scheduler's own energy fields are empty. It is completed by a declared model of
+memory power, a proxy power usage effectiveness and an allocated share of
+hardware production. Each figure is traceable to a measured value, a cited
+factor or a labelled assumption, and the scripts that recompute them are kept
+with the job.
+
+Section~II positions the study. Section~\ref{sec:goalscope} defines the job,
+the functional unit and the boundary. Section~\ref{sec:lci} inventories the
+measured flows. Section~\ref{sec:lcia} converts them into gCO\textsubscript{2}e
+per run, Section~\ref{sec:interpretation} interprets that figure, and
+Section~\ref{sec:reporting} names its hotspots. Section~\ref{sec:optimisation}
+attacks those hotspots, and Section~\ref{sec:payback} computes the carbon
+payback. Section~\ref{sec:threats} lists the threats to validity.
 
 % ---------------------------------------------------------------------
 \section{Related Work}
@@ -324,49 +366,132 @@ How far a different value would move the result is discussed in
 Section~\ref{sec:threats}.
 
 \subsection{Life cycle impact assessment}\label{sec:lcia}
-\guidance{Single-criteria carbon footprint: climate change only. Say so,
-and say what that leaves out.
+The impact assessment multiplies each inventory flow by a characterisation
+factor, an impact per unit of flow, chosen, cited and motivated. This study
+assesses one impact category, climate change. It is a single-criterion
+carbon footprint in CO\textsubscript{2}e. It leaves out water use, mineral
+resource use and every other category of the Environmental Footprint method.
+The characterisation method is IPCC~2021~\cite{ipcc2021}, and every factor below
+is read as GWP100. The chain from joules to grams is gathered in
+Table~\ref{tab:chain} in Appendix~A. Every value in it is recomputed from the
+raw records by the script \texttt{lcia-calculation.py} of the project
+repository.
 
-Name the characterisation method, IPCC 2021, and the indicator you read out of
-it, GWP100. Hold that one indicator across every factor in the paper.
+\emph{The energy boundary.} The measured CPU-package energy of
+Section~\ref{sec:lci}, 67\,834~J, covers the two processor packages during the
+Python step only. The job, however, holds the whole node for its walltime.
+This study therefore builds a node estimate from three terms, each taken per
+run from the five \texttt{aion-0144} runs and paired with those runs' own
+timing:
+(1)~the measured package energy over the Python step;
+(2)~the idle package rate, 182.6~W, over the rest of the allocation, the gap
+between Slurm's \texttt{Elapsed} and the Python step (1 to 3~s per run, 0.2 to
+0.6~kJ);
+(3)~the memory, modelled with the Green Algorithms coefficient of
+0.3725~W/GB~\cite{lannelongue2021} for the 256~GB installed, 95.4~W, over
+\texttt{Elapsed}.
+The median node estimate is 103\,146~J (range 101\,622 to 104\,215~J), or
+0.0287~kWh, over a median \texttt{Elapsed} of 364~s. It is still partial. The
+board, the local SSD, the network card and power conversion are outside it, and
+Section~\ref{sec:threats} gives their likely size. The functional unit's 368~s
+comes from the \texttt{aion-0127} series, which carries no energy reading. The
+energy chain uses the 364~s of the \texttt{aion-0144} runs instead, so that
+energy and time come from the same runs. The two medians differ by 1.1\,\%.
 
-Then name every factor, where it comes from, the date you read it \emph{and its
-basis}: the grid intensity of the country the machine sits in, the PUE you
-declare with the argument that supports it, and then ecoinvent or a vendor
-product carbon footprint sheet for anything made. A local grid factor
-substitutes into the \emph{operational} term only, since hardware is made
-worldwide.
+\emph{Site.} The declared PUE of 1.36~\cite{eudc2025} (Section~\ref{sec:lci})
+multiplies the node estimate: $0.0287~\text{kWh}\times1.36=0.0390$~kWh drawn
+by the site per run.
 
-Then the result: your baseline in gCO\textsubscript{2}e per run, with the units
-carried at every step so a reader can follow the chain from joules to grams.
-Your inputs carry two significant digits, so report your answer to two.}
+\emph{Grid factor.} Aion is in Luxembourg. The factor is ecoinvent~3.11 cut-off,
+\emph{market for electricity, low voltage}, LU, time period 2020--2024, IPCC~2021
+climate change total excluding biogenic CO\textsubscript{2},
+GWP100~\cite{ecoinventlu}: 337~gCO\textsubscript{2}e/kWh, read on 19~October
+2026. It describes the electricity consumed in Luxembourg, imports and grid
+losses included, which is the electricity the site draws. A factor that
+counts only generation on national territory would leave out the imports.
+Operational impact: $0.0390~\text{kWh}\times337~\text{g/kWh}=13.1$~gCO\textsubscript{2}e
+per run.
+
+\emph{Hardware production.} Section~\ref{sec:lci} holds two proxies. This study
+uses the Dell PowerEdge R7525~\cite{dellr7525}, a two-socket AMD EPYC
+server, because the ecoinvent desktop dataset models a 2002 single-processor
+machine of 11.3~kg. The R7525 figure is 1\,768.4~kg CO\textsubscript{2}e, of
+which 854.7~kg comes from two 4~TB SSDs. An Aion node holds one 480~GB SSD, so
+the two SSDs are removed, which leaves 913.7~kg. The Dell study characterises
+with IPCC~2013, not IPCC~2021, and publishes no inventory per gas, so the figure
+cannot be recharacterised. For CO\textsubscript{2} the two methods agree, with a
+GWP100 of~1 by definition. Between them, the GWP100 of fossil methane moves from
+28 to 29.8 and that of N\textsubscript{2}O from 265 to
+273~\cite{myhre2013,ipcc2021}, which are changes of 6\,\% and 3\,\%. A change of
+that order on the hardware term moves the total by less than 1\,\%. The figure
+is therefore kept and labelled IPCC~2013 in Table~\ref{tab:chain}. The grid
+factor is not applied to it, because the hardware is made worldwide. With the
+allocation rule of Section~\ref{sec:lci} and the 364~s of the paired series, one
+run holds $364/189\,345\,600=1.92\times10^{-6}$ of a six-year life, so
+$913.7~\text{kg}\times1.92\times10^{-6}=1.76$~gCO\textsubscript{2}e per run.
+
+\emph{Result.} One run of the baseline job emits
+$13.1+1.8\approx15$~gCO\textsubscript{2}e, to two significant figures.
 
 \subsection{Interpretation}\label{sec:interpretation}
-\guidance{What that number is a number \emph{of}, in one sentence.
+The figure of 15~gCO\textsubscript{2}e is the GWP100 footprint of one run of
+the frozen job holding one exclusive Aion node for 364~s. It counts the
+measured CPU packages, a modelled memory, the site through a proxy PUE, and a
+time share of a proxy server's production.
 
-Then make it mean something. Put it next to the everyday comparators of
-Session 2, a kilometre by car, an hour of a 5\,W LED, a day of a Luxembourg
-resident, and say what one run of your job amounts to in each. Pick the
-comparison that a reader outside this course would understand first.
+\emph{Against daily life.} A 5~W LED bulb lit for one hour draws 5~Wh, or
+1.7~gCO\textsubscript{2}e on the same Luxembourg factor. One run therefore
+equals about 9~hours of that bulb. It also equals about 50~m in a small petrol
+car, at 291~gCO\textsubscript{2}e per km~\cite{ries2026s2}. That figure is
+cradle to grave and includes the road, so it has a wider boundary than the
+footprint of one run. At the assumed 100~runs per year, the job emits
+1.5~kgCO\textsubscript{2}e per year.
 
-Then cross-check your own arithmetic. Estimate the energy from the top down,
-the nodes you held times their rated power times the walltime, and put it next
-to the figure Section~\ref{sec:lci} settled on for the same run. Say by how much
-the two differ, and which one your result uses. Say also which kind of check it
-is: a top-down estimate next to a counter reading tests the reading, and next to
-a substitute it tests the substitute.}
+\emph{Against the alternative scenarios.} Table~\ref{tab:scenarios} in
+Appendix~A puts the chosen estimate next to the energy scenarios of
+Section~\ref{sec:lci}, all on the 364~s of the paired series. The Green
+Algorithms figures of Section~\ref{sec:lci}, 36.7 and 241~kJ, used the 368~s of
+\texttt{aion-0127}, so they are 1.1\,\% higher than the 36.3 and 238.6~kJ shown
+here. Each gap has one cause.
+The package energy alone, 67.8~kJ, lacks the memory term (34.7~kJ) and, for
+the median run, the 0.6~kJ outside the Python step. It is 34\,\% below the chosen figure.
+The one-core model, 36.3~kJ, counts 4.4~W of processor power where the
+packages measure 188~W, because it gives the 127 unused cores no power at all.
+That accounts for its entire 66.8~kJ gap, since the memory term is the same in
+both. The all-cores model, 238.6~kJ, counts 560~W of processor power, the
+rated maximum of both packages. That is 135~kJ more than the chosen figure.
+The package energy above idle, 1.9~kJ, is the work the program itself adds. It
+is less than 2\,\% of the chosen figure.
+
+\emph{Which check this is.} The all-cores model is a top-down estimate: the node
+held, times its rated processor power, times the walltime. Next to a counter
+reading, it tests the reading. The measured 188~W is 34\,\% of the rated
+560~W. That ratio is plausible for a node on which one core of 128 works, so
+the check supports the reading and does not contradict it. The one-core model is
+a substitute. Next to the reading, the substitute is the figure under test:
+used on an exclusive node, it understates the processor power 43-fold
+(4.4 against 188~W) and the node estimate almost threefold. The chosen result keeps the reading, and uses a model only for the
+memory, which no counter reaches.
 
 \subsection{Reporting}\label{sec:reporting}
-\guidance{Two short paragraphs, written for a reader who did not follow
-the calculation.
+The baseline is 15~gCO\textsubscript{2}e per run: 13.1~g of electricity and
+1.8~g of hardware production. The functional unit is one run of
+\texttt{kc-py1.py} on the fixed input, holding one exclusive regular Aion node
+on partition \texttt{batch} for 364~s. The conventions are IPCC~2021 GWP100,
+CPU packages measured with RAPL over the Python step, memory modelled at
+0.3725~W/GB, a PUE of 1.36, a grid factor of 337~gCO\textsubscript{2}e/kWh and
+a six-year hardware life. Across the node scenarios of
+Table~\ref{tab:scenarios}, the total ranges from 6.4 to 32~gCO\textsubscript{2}e. A reader who reuses the
+figure should scale it with the node-time held, not with the CPU work done.
 
-First, the result: the number, the functional unit it belongs to, and the
-conventions a reader needs in order to reuse it.
-
-Then \emph{the hotspots}. The rest of the paper hangs on them. Which component,
-or which resource, carries most of your number? Name one, two at most, with the
-share each takes. \textbf{What you name here is what
-Section~\ref{sec:optimisation} attacks.}}
+Two hotspots carry the result, and both come from the allocation shape rather
+than from the counting. The first is the idle draw of the CPU packages of the
+exclusive node: 8.5~gCO\textsubscript{2}e, or 57\,\% of the total with its share
+of the site overhead. The program's own work above idle takes 1.6\,\%. The
+second is the reserved memory: 4.4~gCO\textsubscript{2}e, or 30\,\%. The job touches
+3.4\,\% of that memory. The remaining 12\,\% is hardware production.
+Section~\ref{sec:optimisation} attacks these two hotspots: one 128-core node,
+held whole, for a program that uses one core and 7.4~GiB.
 
 % ---------------------------------------------------------------------
 \section{Optimisation}\label{sec:optimisation}
@@ -464,42 +589,89 @@ figures carry.}
 
 % ---------------------------------------------------------------------
 \section{Threats to Validity}\label{sec:threats}
-\guidance{The threats you could not resolve, and how far each one could move
-your number. Data gaps, estimation choices, and anything the functional unit
-excludes.
+This section lists the limitations of Section~\ref{sec:lcia} that remain open.
+For each, it gives the direction in which it moves the baseline of
+15~gCO\textsubscript{2}e and, where possible, by how much. Each shift below
+moves one input of \texttt{lcia-calculation.py} and holds the others fixed.
 
-Six that this course hands you, and that belong here:
+\emph{Missing whole-node power.} No instrument reaches the whole node. RAPL
+covers the processor packages only, and the memory term is a generic
+coefficient~\cite{lannelongue2021}, not a reading. The board, the local SSD, the
+network card and power conversion are not counted, so the result is too low.
+Their power on an Aion node is not published. Each 50~W they draw adds
+2.3~gCO\textsubscript{2}e per run, or 16\,\%. The memory coefficient can err in
+either direction. The idle rate assumed outside the Python step concerns at
+most 0.6~kJ per run, under 1\,\% of the node estimate. The idle reading is one
+60-second interval taken after the fifth run. If the idle draw varies over time,
+the 57\,\% hotspot share moves with it.
 
-\emph{Every substitute you could not source.} Section~\ref{sec:lci} carries the
-substitutes you could source. The ones you could not are assumptions, and each
-one is named here with what it stands in for and how far it could move your
-result.
+\emph{Proxy PUE.} The PUE of 1.36 is an EU average for 2023~\cite{eudc2025}, not
+a value measured at this site. Aion's blades are built on a cold plate that cools every component by
+direct contact~\cite{ulhpcaion}, which may put the site below the average, but
+no site value is published. A PUE of 1.1 gives
+12.4~gCO\textsubscript{2}e, 17\,\% less, and 1.6 gives
+17.2~gCO\textsubscript{2}e, 16\,\% more. Each step of 0.1 moves the result by
+about 1.0~g.
 
-\emph{What your energy figure covers.} A counter reading is taken from
-the nodes your job held, and it describes your job alone when the allocation is
-exclusive, which is why your protocol asks for one. On a shared node it
-also carries whatever ran beside you. Whichever figure Section~\ref{sec:lci}
-settled on, a reading or a substitute, the switches that carried the job's
-traffic, the storage that served its files and the cooling that kept it running
-sit outside it, which is why the site enters your study through a declared PUE
-rather than through a meter. Say what that leaves uncertain, and if you
-substituted, how far the substitute could move your result.
+\emph{Grid factor.} The factor describes low-voltage consumption, including
+distribution losses. If the site is supplied at a higher voltage, part of those
+losses does not apply, and the result is slightly too high. The voltage of the
+connection is not published. The factor rests on the 2020--2024 market and
+is shown to three significant figures. Its documentation also refers to the
+high voltage level, against its own title.
 
-\emph{The PUE you declared}, its argument and its source, and what a different
-value would do to your result.
+\emph{Proxy hardware data.} No production footprint exists for an Aion node.
+The R7525 is a rack server with its own chassis, fans and power supplies. An
+Aion node is one of three nodes in a cold-plate-cooled blade~\cite{ulhpcaion}. The SSDs are removed
+on the assumption that the rest of the R7525 resembles the node. With the
+ecoinvent desktop instead, the hardware term falls to 0.43~g and the total to
+13.6~g, 9\,\% less. With the R7525 as published, the hardware term rises to 3.4~g
+and the total to 16.5~g, 11\,\% more. The R7525 figure uses IPCC~2013. For
+methane and N\textsubscript{2}O this moves the hardware term by a few per cent
+and the total by less than 1\,\% (Section~\ref{sec:lcia}). The fluorinated gases
+of chip making are not broken down in the Dell study, so their change between
+the two methods is not checked. The production of the chassis, the switches,
+the storage servers and the building is left out, so the result is too low.
 
-\emph{Figures that are not at the same level of completeness.} One of your factors may be cradle to
-grave while another covers use only. Adding them treats them as if they were the
-same kind of thing. That is often the only data you have. Name every figure
-whose boundary differs from the others, and say in which direction it pushes
-your result.
+\emph{Assumed service life.} The six-year life is an assumption. Aion has run
+for five years and has no published retirement date~\cite{ulhpcaion}. A
+four-year life gives 15.8~g, 6\,\% more, and an eight-year life gives 14.4~g,
+3\,\% less. The allocation also assumes that the node is available for every
+second of its life. Downtime and idle periods between jobs spread production
+over fewer node-seconds, so the hardware term is too low by that unknown
+fraction.
 
-\emph{Burden shifting}: what a carbon-only criterion hides for your job. An
-improvement that lowers your number can raise a total you did not measure, and a
-job made faster is often a job run more often.
+\emph{Cache state.} File system caches were neither reset nor measured, so a
+run may have read its input from the page cache rather than from GPFS. The
+Python step is bound by computation: its CPU time is 99.7\,\% of its elapsed
+time in job 15861652. Reading from storage is therefore a small part of the
+walltime. The walltimes of the five paired runs span 359 to 368~s, and the node
+estimate spans 101.6 to 104.2~kJ. A cache effect is bounded by that 2.5\,\%
+spread.
 
-\emph{The limit of one criterion}: these results cover climate change
-only, on one job, and support no comparison with anybody else's job.}
+\emph{Measurement on different nodes.} The walltimes of the functional unit come
+from \texttt{aion-0127}, and the energy from \texttt{aion-0144}. The chain uses
+only the \texttt{aion-0144} values. With the 368~s of \texttt{aion-0127}, the
+result would be 15.05 instead of 14.89~gCO\textsubscript{2}e, 1.1\,\% more. An
+idle package reading on a third node, \texttt{aion-0234}, gave 178.6~W against
+182.6~W on \texttt{aion-0144}. Identical nodes thus differ by about 2\,\% at
+idle.
+
+\emph{Figures with different boundaries.} The electricity terms cover use only.
+The R7525 figure covers production, while the ecoinvent desktop includes
+packaging and disposal. End of life is outside the result, so the result is too
+low by the unknown share of disposal. The car comparator of
+Section~\ref{sec:interpretation} is cradle to grave, which makes one run look
+smaller next to it than a comparison on the same boundary would.
+
+\emph{Runs per year.} The figure of 100~runs per year is an assumption. It
+leaves the result per run unchanged and scales only the annual figure and the
+payback period of Section~\ref{sec:payback}.
+
+\emph{One criterion, burden shifting.} The result covers climate change only, on
+one job. It hides the mineral and water use of hardware production. A change
+that frees the node may also lead the job to be run more often. The result
+supports no comparison with another job.
 
 % ---------------------------------------------------------------------
 % Unnumbered on purpose, for two reasons. The paper has six numbered
@@ -587,6 +759,56 @@ Storage      & Input stored & 187\,693\,955~B & \texttt{stat}, SHA-256 checked (
              & Output stored & 1\,972~B & \texttt{stat} & measured \\
 Site         & PUE & 1.36 & EU average, 2023 data~\cite{eudc2025} & declared proxy \\
 All          & Runs per year & 100 & Section~\ref{sec:threats} & assumption \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[!t]
+\caption{Impact chain for one run (Section~\ref{sec:lcia}). Energy values are
+the medians of the five runs on \texttt{aion-0144} (jobs 15861652--60), each
+paired with its own \texttt{Elapsed}; recomputed by
+\texttt{lcia-calculation.py} on 19~October~2026. IPCC~2021 GWP100 unless
+stated.}
+\label{tab:chain}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Step & Value and unit & Source or rule & Kind \\
+\midrule
+Walltime held (\texttt{Elapsed}) & 364~s (range 359--368) & \texttt{sacct}, jobs 15861652--60 & measured \\
+CPU packages, Python step & 67\,834~J & RAPL & measured \\
+CPU packages, rest of allocation & 0.2--0.6~kJ & 182.6~W idle $\times$ (\texttt{Elapsed} $-$ step) & derived \\
+Memory & 95.4~W $\times$ 364~s $=$ 34.7~kJ & 0.3725~W/GB $\times$ 256~GB~\cite{lannelongue2021} & model \\
+Node estimate & 103\,146~J $=$ 0.0287~kWh & sum of the three, per run & derived \\
+Site electricity & 0.0390~kWh & $\times$ PUE 1.36~\cite{eudc2025} & declared proxy \\
+Grid factor & 337~gCO\textsubscript{2}e/kWh & ecoinvent 3.11, electricity low voltage, LU~\cite{ecoinventlu}, read 19 Oct 2026 & looked up \\
+\textbf{Operational} & \textbf{13.1~gCO\textsubscript{2}e} & $0.0390 \times 337$ & derived \\
+Hardware production & 913.7~kg CO\textsubscript{2}e (IPCC 2013) & R7525 1\,768.4~kg $-$ 854.7~kg SSDs~\cite{dellr7525} & looked up \\
+Share per run & $1.92\times10^{-6}$ & 364~s / 189\,345\,600~s (six years) & assumption \\
+\textbf{Embodied} & \textbf{1.76~gCO\textsubscript{2}e} & $913.7~\text{kg} \times 1.92\times10^{-6}$ & derived \\
+\textbf{Total} & \textbf{15~gCO\textsubscript{2}e per run} & 13.1 $+$ 1.8, two significant figures & derived \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[!t]
+\caption{Energy scenarios for one run (Section~\ref{sec:interpretation}), all on
+the 364~s median \texttt{Elapsed} of \texttt{aion-0144}, with PUE 1.36,
+337~gCO\textsubscript{2}e/kWh and the chosen 1.76~g of hardware production.
+The Green Algorithms rows use 4.375~W per core (280~W per 64-core
+processor~\cite{ulhpcaion}) and 0.3725~W/GB for 256~GB~\cite{lannelongue2021}.}
+\label{tab:scenarios}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Scenario & Node energy (kJ) & Site (kWh) & Operational (gCO\textsubscript{2}e) & Total (gCO\textsubscript{2}e) \\
+\midrule
+CPU packages, Python step only (Section~\ref{sec:lci}) & 67.8 & 0.0256 & 8.6 & 10.4 \\
+\textbf{Chosen: packages over the allocation $+$ memory model} & \textbf{103.1} & \textbf{0.0390} & \textbf{13.1} & \textbf{14.9} \\
+Green Algorithms, 1 core $+$ 256~GB & 36.3 & 0.0137 & 4.6 & 6.4 \\
+Green Algorithms, 128 cores at rated power $+$ 256~GB & 238.6 & 0.0901 & 30.4 & 32.1 \\
+\midrule
+CPU packages above idle, Python step (the program's own work) & 1.9 & 0.0007 & 0.24 & 2.0 \\
 \bottomrule
 \end{tabular}
 \end{table*}

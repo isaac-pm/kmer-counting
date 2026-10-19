@@ -63,3 +63,21 @@ Null result:
    'computer production, laptop' (GLO, 170 kg CO2-eq/unit)."
 
 Licensing: screenshots contain ecoinvent data — keep them out of the repo.
+
+------------------------------------------------------------------------------
+Grid factor lookup — read on 2026-10-19 (Europe/Luxembourg), for Section III.C
+
+Database: ecoinvent 3.11, system model cut-off, ecoquery.ecoinvent.org (already signed in;
+          read through a browser assistant on the author's signed-in session)
+Dataset 3:
+  Activity name:       market for electricity, low voltage
+  Reference product:   electricity, low voltage   Unit: kWh
+  Geography:           LU   Time period: 2020–2024
+  System model:        cut-off
+  LCIA method shown:   IPCC 2021
+  Row:                 climate change: total (excl. biogenic CO2) | global warming potential (GWP100)
+  Value:               0.337 kg CO2-Eq per kWh = 337 g CO2e/kWh (ecoQuery shows three significant figures)
+                       (incl. SLCFs variant: 0.339; fossil-only GWP100 row: 0.331)
+  URL:                 https://ecoquery.ecoinvent.org/3.11/cutoff/dataset/2297/impact_assessment
+  Caveat:              the dataset description text mentions "the high voltage level" although
+                       the title and reference product are low voltage; cited as the low-voltage dataset.

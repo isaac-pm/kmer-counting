@@ -1,0 +1,49 @@
+UTC calculation: 2026-10-19T07:32:52+00:00
+$ python3 job/measurements/lcia-calculation.py
+Source: baseline-JOBID.txt, sacct-JOBID.txt, idle-15861674.txt (aion-0144 series)
+Grid 337.0 gCO2e/kWh | PUE 1.36 | memory 95.36 W | idle packages 182.642 W
+JOBID|Slurm elapsed s|perf s|package J|package over allocation J|node estimate J (packages + memory)
+15861652|364|360.711|67833.8|68434.6|103145.6
+15861654|359|357.814|67214.9|67431.5|101665.7
+15861656|359|357.580|67128.8|67388.1|101622.4
+15861658|365|362.740|67941.4|68354.2|103160.6
+15861660|368|366.384|68827.2|69122.4|104214.9
+Median Slurm elapsed aion-0144: 364 s (aion-0127 series: 368 s)
+Median perf step: 360.711 s
+Lifetime share: 364 / 189345600 = 1.9224e-06
+Embodied, Dell R7525 without its two 4 TB SSDs (chosen): 1.757 gCO2e
+Embodied, ecoinvent desktop without screen (low): 0.425 gCO2e
+Embodied, Dell R7525 as published (high): 3.400 gCO2e
+
+Scenario|IT energy J|IT kWh|site kWh (x PUE)|operational gCO2e|total with chosen embodied gCO2e
+Packages, Python step only (HW2 carried value)|67834|0.01884|0.02563|8.636|10.393
+Packages above idle, Python step|1863|0.00052|0.00070|0.237|1.994
+Chosen: packages over allocation + memory model|103146|0.02865|0.03897|13.132|14.888
+Green Algorithms, 1 core + 256 GB|36304|0.01008|0.01371|4.622|6.378
+Green Algorithms, 128 cores at TDP + 256 GB|238551|0.06626|0.09012|30.370|32.127
+
+Chosen result: 13.132 operational + 1.757 embodied = 14.888 gCO2e per run
+Share of total gCO2e per run, each energy part with its PUE overhead|gCO2e|share
+CPU packages at idle rate|8.465|56.9%
+CPU packages above idle|0.237|1.6%
+Memory (model)|4.419|29.7%
+Embodied, chosen|1.757|11.8%
+Of the total, site overhead (PUE - 1) alone: 3.476 gCO2e, 23.3%
+Check: IT sum 103065.3 J vs node median 103145.6 J (medians of parts need not add exactly)
+
+Sensitivity of the chosen total (one input moved, all else fixed)|gCO2e per run
+PUE 1.1|12.378
+PUE 1.2|13.343
+PUE 1.5|16.240
+PUE 1.6|17.205
+Service life 4 years|15.766
+Service life 8 years|14.449
+Unmeasured node components at 50 W|17.205 (+2.317)
+Unmeasured node components at 100 W|19.522 (+4.634)
+Walltime of aion-0127 (368 s) instead of aion-0144|15.052
+
+Comparators, chosen total
+5 W LED for one hour on the same grid: 1.685 gCO2e, so one run = 8.8 h
+Small petrol car, 291 gCO2e/km: one run = 51 m
+100 runs per year: 1.49 kgCO2e
+Package energy is measured (RAPL); memory power is modelled; board, fans, SSD and NIC are not counted.
