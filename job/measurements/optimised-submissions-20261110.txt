@@ -1,0 +1,20 @@
+Submitted 2026-11-10T16:04:02Z from /mnt/aiongpfs/users/ipalmamedina/kmer-counting on access1
+4628ab8d2335fbfd0da46f54dc5e8ac9b0b32e3f9df038a7993ed72ccf9d0438  job/baseline/kc-py1.py
+e2df4af7f1fe26a701336c953344717150e77c89c6dd3f56c4aca253374a71c3  job/optimised/run-rightsized.sh
+6a01b33b627ab174772f9d3b947565da596bb1ac89c75990a953154834f5e7ac  job/optimised/run-cython.sh
+f7e127ae227b42ae28eadf47dce9363895fec6ab61789ccf8caa3f4d8b679aa2  job/optimised/build-cython.sh
+ea9d5015b003c15280491a4cb96d683ca8ce29fda5f92c9d40cdfd496d87ce6b  job/optimised/build/kc-py1.c
+dae47ccbaaab4df9a871cd66186eaa7b26e1129e3557131b5611f6d32e004bc1  job/optimised/build/kc-py1-cython
+24f9e8583a140888b16775e327391b94e8846c1b50748498c3be0618f21463ee  job/optimised/collect-optimised.sh
+dd2ef49aebabfed1574b55fd002025f29b2fda88c70b2095f5e1b3a822cee736  job/data/M_abscessus_HiSeq_10M.fa.gz
+Command per run: sbatch --parsable --dependency=singleton SCRIPT; sbatch --parsable --dependency=afterany:JOBID job/optimised/collect-optimised.sh JOBID
+run 1 rightsized: 16225119 collector 16225120
+run 1 cython: 16225121 collector 16225122
+run 2 rightsized: 16225123 collector 16225124
+run 2 cython: 16225125 collector 16225126
+run 3 rightsized: 16225127 collector 16225128
+run 3 cython: 16225129 collector 16225130
+run 4 rightsized: 16225131 collector 16225132
+run 4 cython: 16225133 collector 16225134
+run 5 rightsized: 16225135 collector 16225136
+run 5 cython: 16225137 collector 16225138

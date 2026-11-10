@@ -1,0 +1,21 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) env/release/default
+Node: aion-0046
+Job ID: 16118778
+Python 3.11.5
+env/release/default
+compiler/GCCcore/13.2.0
+lib/zlib/1.2.13-GCCcore-13.2.0
+tools/binutils/2.40-GCCcore-13.2.0
+tools/bzip2/1.0.8-GCCcore-13.2.0
+devel/ncurses/6.4-GCCcore-13.2.0
+lib/libreadline/8.2-GCCcore-13.2.0
+lang/Tcl/8.6.13-GCCcore-13.2.0
+devel/SQLite/3.43.1-GCCcore-13.2.0
+tools/XZ/5.4.4-GCCcore-13.2.0
+lib/libffi/3.4.4-GCCcore-13.2.0
+system/OpenSSL/1.1
+lang/Python/3.11.5-GCCcore-13.2.0
+srun: fatal: cpus-per-task set by two different environment variables SLURM_CPUS_PER_TASK=5 != SLURM_TRES_PER_TASK=cpu=1

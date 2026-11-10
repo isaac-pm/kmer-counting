@@ -1,0 +1,167 @@
+{
+  "info": {
+    "id": "ses_e8109f275ffe8TM5Fa25OhjNRf",
+    "slug": "swift-mountain",
+    "projectID": "a3747ca89329665af3e28c9592f6a8904722752f",
+    "directory": "[redacted:session-directory:ses_e8109f275ffe8TM5Fa25OhjNRf]",
+    "path": "",
+    "title": "[redacted:session-title:ses_e8109f275ffe8TM5Fa25OhjNRf]",
+    "agent": "build",
+    "model": {
+      "id": "deepseek/deepseek-v4-flash-0731",
+      "providerID": "openrouter",
+      "variant": "default"
+    },
+    "version": "1.19.3",
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    },
+    "cost": 0.001475481,
+    "tokens": {
+      "input": 12365,
+      "output": 2,
+      "reasoning": 15,
+      "cache": {
+        "read": 0,
+        "write": 0
+      }
+    },
+    "permission": [
+      {
+        "permission": "question",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_enter",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_exit",
+        "pattern": "*",
+        "action": "deny"
+      }
+    ],
+    "time": {
+      "created": 1793131416971,
+      "updated": 1793131421615
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1793131417052
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "openrouter",
+          "modelID": "deepseek/deepseek-v4-flash-0731"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_17ef60ddc001in4tQ1PMZH76LF",
+        "sessionID": "ses_e8109f275ffe8TM5Fa25OhjNRf"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "[redacted:text:prt_17ef60de40016J4mJl9x1JrFbx]",
+          "id": "prt_17ef60de40016J4mJl9x1JrFbx",
+          "sessionID": "ses_e8109f275ffe8TM5Fa25OhjNRf",
+          "messageID": "msg_17ef60ddc001in4tQ1PMZH76LF"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_17ef60ddc001in4tQ1PMZH76LF",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "[redacted:cwd:msg_17ef6108c001BGeWTvPlWwozA5]",
+          "root": "[redacted:root:msg_17ef6108c001BGeWTvPlWwozA5]"
+        },
+        "cost": 0.001475481,
+        "tokens": {
+          "total": 12382,
+          "input": 12365,
+          "output": 2,
+          "reasoning": 15,
+          "cache": {
+            "write": 0,
+            "read": 0
+          }
+        },
+        "modelID": "deepseek/deepseek-v4-flash-0731",
+        "providerID": "openrouter",
+        "time": {
+          "created": 1793131417740,
+          "completed": 1793131421608
+        },
+        "finish": "stop",
+        "id": "msg_17ef6108c001BGeWTvPlWwozA5",
+        "sessionID": "ses_e8109f275ffe8TM5Fa25OhjNRf"
+      },
+      "parts": [
+        {
+          "snapshot": "[redacted:snapshot:prt_17ef61ef5001kj6gjm4YonN2BO]",
+          "type": "step-start",
+          "id": "prt_17ef61ef5001kj6gjm4YonN2BO",
+          "sessionID": "ses_e8109f275ffe8TM5Fa25OhjNRf",
+          "messageID": "msg_17ef6108c001BGeWTvPlWwozA5"
+        },
+        {
+          "type": "reasoning",
+          "text": "[redacted:reasoning:prt_17ef61ef9001DMEUcICYb0IJ3p]",
+          "time": {
+            "start": 1793131421433,
+            "end": 1793131421544
+          },
+          "metadata": {
+            "redacted": "reasoning-metadata:prt_17ef61ef9001DMEUcICYb0IJ3p"
+          },
+          "id": "prt_17ef61ef9001DMEUcICYb0IJ3p",
+          "sessionID": "ses_e8109f275ffe8TM5Fa25OhjNRf",
+          "messageID": "msg_17ef6108c001BGeWTvPlWwozA5"
+        },
+        {
+          "type": "text",
+          "text": "[redacted:text:prt_17ef61f6a001nSt1vCgxWSmhLc]",
+          "time": {
+            "start": 1793131421546,
+            "end": 1793131421561
+          },
+          "id": "prt_17ef61f6a001nSt1vCgxWSmhLc",
+          "sessionID": "ses_e8109f275ffe8TM5Fa25OhjNRf",
+          "messageID": "msg_17ef6108c001BGeWTvPlWwozA5"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "[redacted:snapshot:prt_17ef61f8a001otFtyvfaPD2nXI]",
+          "type": "step-finish",
+          "tokens": {
+            "total": 12382,
+            "input": 12365,
+            "output": 2,
+            "reasoning": 15,
+            "cache": {
+              "write": 0,
+              "read": 0
+            }
+          },
+          "cost": 0.001475481,
+          "id": "prt_17ef61f8a001otFtyvfaPD2nXI",
+          "sessionID": "ses_e8109f275ffe8TM5Fa25OhjNRf",
+          "messageID": "msg_17ef6108c001BGeWTvPlWwozA5"
+        }
+      ]
+    }
+  ]
+}

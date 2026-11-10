@@ -1,0 +1,169 @@
+{
+  "info": {
+    "id": "ses_e80fde285ffeqOMz3cuGw6XpDt",
+    "slug": "happy-star",
+    "projectID": "a3747ca89329665af3e28c9592f6a8904722752f",
+    "directory": "[redacted:session-directory:ses_e80fde285ffeqOMz3cuGw6XpDt]",
+    "path": "",
+    "title": "[redacted:session-title:ses_e80fde285ffeqOMz3cuGw6XpDt]",
+    "agent": "optimiser",
+    "model": {
+      "id": "deepseek/deepseek-v4-flash-0731",
+      "providerID": "openrouter",
+      "variant": "low"
+    },
+    "version": "1.19.3",
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    },
+    "cost": 0.000707812,
+    "tokens": {
+      "input": 5920,
+      "output": 2,
+      "reasoning": 12,
+      "cache": {
+        "read": 0,
+        "write": 0
+      }
+    },
+    "permission": [
+      {
+        "permission": "question",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_enter",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_exit",
+        "pattern": "*",
+        "action": "deny"
+      }
+    ],
+    "time": {
+      "created": 1793132207483,
+      "updated": 1793132211240
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1793132208001
+        },
+        "agent": "optimiser",
+        "model": {
+          "providerID": "openrouter",
+          "modelID": "deepseek/deepseek-v4-flash-0731",
+          "variant": "low"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_17f021f81001bnScp4pEmnI3Sb",
+        "sessionID": "ses_e80fde285ffeqOMz3cuGw6XpDt"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "[redacted:text:prt_17f021f87001W8GVDLBMuuXQ3U]",
+          "id": "prt_17f021f87001W8GVDLBMuuXQ3U",
+          "sessionID": "ses_e80fde285ffeqOMz3cuGw6XpDt",
+          "messageID": "msg_17f021f81001bnScp4pEmnI3Sb"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_17f021f81001bnScp4pEmnI3Sb",
+        "role": "assistant",
+        "mode": "optimiser",
+        "agent": "optimiser",
+        "variant": "low",
+        "path": {
+          "cwd": "[redacted:cwd:msg_17f021f99001E7R0dz6hePaIMJ]",
+          "root": "[redacted:root:msg_17f021f99001E7R0dz6hePaIMJ]"
+        },
+        "cost": 0.000707812,
+        "tokens": {
+          "total": 5934,
+          "input": 5920,
+          "output": 2,
+          "reasoning": 12,
+          "cache": {
+            "write": 0,
+            "read": 0
+          }
+        },
+        "modelID": "deepseek/deepseek-v4-flash-0731",
+        "providerID": "openrouter",
+        "time": {
+          "created": 1793132208025,
+          "completed": 1793132211227
+        },
+        "finish": "stop",
+        "id": "msg_17f021f99001E7R0dz6hePaIMJ",
+        "sessionID": "ses_e80fde285ffeqOMz3cuGw6XpDt"
+      },
+      "parts": [
+        {
+          "snapshot": "[redacted:snapshot:prt_17f022b7c0014s2Htnu3kK8rrR]",
+          "type": "step-start",
+          "id": "prt_17f022b7c0014s2Htnu3kK8rrR",
+          "sessionID": "ses_e80fde285ffeqOMz3cuGw6XpDt",
+          "messageID": "msg_17f021f99001E7R0dz6hePaIMJ"
+        },
+        {
+          "type": "reasoning",
+          "text": "[redacted:reasoning:prt_17f022b80001cZOLAOMETH9jTZ]",
+          "time": {
+            "start": 1793132211072,
+            "end": 1793132211153
+          },
+          "metadata": {
+            "redacted": "reasoning-metadata:prt_17f022b80001cZOLAOMETH9jTZ"
+          },
+          "id": "prt_17f022b80001cZOLAOMETH9jTZ",
+          "sessionID": "ses_e80fde285ffeqOMz3cuGw6XpDt",
+          "messageID": "msg_17f021f99001E7R0dz6hePaIMJ"
+        },
+        {
+          "type": "text",
+          "text": "[redacted:text:prt_17f022bd5001nnWpJ1h2ts5d2e]",
+          "time": {
+            "start": 1793132211157,
+            "end": 1793132211164
+          },
+          "id": "prt_17f022bd5001nnWpJ1h2ts5d2e",
+          "sessionID": "ses_e80fde285ffeqOMz3cuGw6XpDt",
+          "messageID": "msg_17f021f99001E7R0dz6hePaIMJ"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "[redacted:snapshot:prt_17f022bf2001gwL8ILdUMFbVib]",
+          "type": "step-finish",
+          "tokens": {
+            "total": 5934,
+            "input": 5920,
+            "output": 2,
+            "reasoning": 12,
+            "cache": {
+              "write": 0,
+              "read": 0
+            }
+          },
+          "cost": 0.000707812,
+          "id": "prt_17f022bf2001gwL8ILdUMFbVib",
+          "sessionID": "ses_e80fde285ffeqOMz3cuGw6XpDt",
+          "messageID": "msg_17f021f99001E7R0dz6hePaIMJ"
+        }
+      ]
+    }
+  ]
+}

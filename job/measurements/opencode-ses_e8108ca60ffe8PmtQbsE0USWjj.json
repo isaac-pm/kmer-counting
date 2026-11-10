@@ -1,0 +1,155 @@
+{
+  "info": {
+    "id": "ses_e8108ca60ffe8PmtQbsE0USWjj",
+    "slug": "hidden-cactus",
+    "projectID": "a3747ca89329665af3e28c9592f6a8904722752f",
+    "directory": "[redacted:session-directory:ses_e8108ca60ffe8PmtQbsE0USWjj]",
+    "path": "",
+    "title": "[redacted:session-title:ses_e8108ca60ffe8PmtQbsE0USWjj]",
+    "agent": "reader",
+    "model": {
+      "id": "deepseek/deepseek-v4-flash-0731",
+      "providerID": "openrouter",
+      "variant": "low"
+    },
+    "version": "1.19.3",
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    },
+    "cost": 0.00057001,
+    "tokens": {
+      "input": 4786,
+      "output": 2,
+      "reasoning": 0,
+      "cache": {
+        "read": 0,
+        "write": 0
+      }
+    },
+    "permission": [
+      {
+        "permission": "question",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_enter",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_exit",
+        "pattern": "*",
+        "action": "deny"
+      }
+    ],
+    "time": {
+      "created": 1793131492767,
+      "updated": 1793131496413
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1793131493303
+        },
+        "agent": "reader",
+        "model": {
+          "providerID": "openrouter",
+          "modelID": "deepseek/deepseek-v4-flash-0731",
+          "variant": "low"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_17ef737b7001a6YpFCEgfIvUbJ",
+        "sessionID": "ses_e8108ca60ffe8PmtQbsE0USWjj"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "[redacted:text:prt_17ef737bd00144YQqxqEHF2N0I]",
+          "id": "prt_17ef737bd00144YQqxqEHF2N0I",
+          "sessionID": "ses_e8108ca60ffe8PmtQbsE0USWjj",
+          "messageID": "msg_17ef737b7001a6YpFCEgfIvUbJ"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_17ef737b7001a6YpFCEgfIvUbJ",
+        "role": "assistant",
+        "mode": "reader",
+        "agent": "reader",
+        "variant": "low",
+        "path": {
+          "cwd": "[redacted:cwd:msg_17ef737ce00110ESf7zpny0Peb]",
+          "root": "[redacted:root:msg_17ef737ce00110ESf7zpny0Peb]"
+        },
+        "cost": 0.00057001,
+        "tokens": {
+          "total": 4788,
+          "input": 4786,
+          "output": 2,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 0
+          }
+        },
+        "modelID": "deepseek/deepseek-v4-flash-0731",
+        "providerID": "openrouter",
+        "time": {
+          "created": 1793131493326,
+          "completed": 1793131496406
+        },
+        "finish": "stop",
+        "id": "msg_17ef737ce00110ESf7zpny0Peb",
+        "sessionID": "ses_e8108ca60ffe8PmtQbsE0USWjj"
+      },
+      "parts": [
+        {
+          "snapshot": "[redacted:snapshot:prt_17ef743a50012jofk0wt44sURv]",
+          "type": "step-start",
+          "id": "prt_17ef743a50012jofk0wt44sURv",
+          "sessionID": "ses_e8108ca60ffe8PmtQbsE0USWjj",
+          "messageID": "msg_17ef737ce00110ESf7zpny0Peb"
+        },
+        {
+          "type": "text",
+          "text": "[redacted:text:prt_17ef743a8001wDCqsjyECqE8t2]",
+          "time": {
+            "start": 1793131496360,
+            "end": 1793131496364
+          },
+          "id": "prt_17ef743a8001wDCqsjyECqE8t2",
+          "sessionID": "ses_e8108ca60ffe8PmtQbsE0USWjj",
+          "messageID": "msg_17ef737ce00110ESf7zpny0Peb"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "[redacted:snapshot:prt_17ef743c0001Y7o5igam40gPmz]",
+          "type": "step-finish",
+          "tokens": {
+            "total": 4788,
+            "input": 4786,
+            "output": 2,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 0
+            }
+          },
+          "cost": 0.00057001,
+          "id": "prt_17ef743c0001Y7o5igam40gPmz",
+          "sessionID": "ses_e8108ca60ffe8PmtQbsE0USWjj",
+          "messageID": "msg_17ef737ce00110ESf7zpny0Peb"
+        }
+      ]
+    }
+  ]
+}

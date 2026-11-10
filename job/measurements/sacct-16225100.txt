@@ -1,0 +1,4 @@
+JobID|JobName|User|Partition|NodeList|AllocNodes|AllocCPUS|ReqMem|MaxRSS|Elapsed|TotalCPU|ConsumedEnergy|ConsumedEnergyRaw|MaxDiskRead|MaxDiskWrite|State|ExitCode
+16225100|kmer-cython-build|ipalmamedina|batch|aion-0089|1|1|1750M||00:00:03|00:01.945|||||FAILED|1:0
+16225100.batch|batch|||aion-0089|1|1||146116K|00:00:03|00:01.945|||0|0|FAILED|1:0
+16225100.extern|extern|||aion-0089|1|1|||00:00:03|00:00:00|||||COMPLETED|0:0

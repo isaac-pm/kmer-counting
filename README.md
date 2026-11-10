@@ -1,173 +1,82 @@
-# Green IT 2026 project template
+# Carbon footprint of a k-mer counting job on an HPC node
 
-Everything you submit this semester is in here. Four documents, one build command.
+A life cycle assessment of one HPC job, and of an AI-assisted optimisation of it, written as a short
+paper for the Green IT 2026 course (University of Luxembourg, HPC track).
 
-## First: pick your track
+The job counts every canonical 31-mer in 5,000,000 DNA reads with `kc-py1.py`, a single-threaded
+Python program from [lh3/kmer-cnt](https://github.com/lh3/kmer-cnt) (commit `e2574719`), on the Aion
+cluster of the University of Luxembourg. The baseline holds a whole 128-core node for a program that
+uses one core. The paper measures its footprint (15 gCO2e per run), optimises only what surrounds the
+unchanged program (a right-sized request and a Cython build: 0.84 g per run), and computes the carbon
+payback of that optimisation (1.32 runs).
 
-The short paper comes in two files, the same paper written for two kinds of object:
-
-```
-src/short-paper-mics.tex       you assess a WEB PAGE
-src/short-paper-hpc.tex        you assess an HPC JOB
-```
-
-**Open the one that matches what you assess, and delete the other.** Each file carries only the
-guidance its own track needs, so you never read instructions written for the other one. The build
-follows whichever files are left.
-
-## Files
+## Where things are
 
 ```
-src/short-paper-mics.tex       your short paper, web page  -> D1 (v1) and D3 (final)
-src/short-paper-hpc.tex        your short paper, HPC job   -> D1 (v1) and D3 (final)
-src/peer-review-1.tex          review of the first paper   -> D2
-src/peer-review-2.tex          review of the second paper  -> D2
-src/response-to-reviewers.tex  your reply to your reviewers -> D3
-src/refs.bib                   your references, shared by every document
-pdf/                           the built PDFs. This is what you upload.
-webpage/                       the frozen copy of the page you study: its .html
-                               and its _files/ folder. See below.
-latexmkrc                      build settings. You do not need to open it.
-opencode.json                  your AI coding agent's setup: the pinned model and
-                               its provider order. The key that goes with it is
-                               handed out in W6.
-serve-frozen-copy.py           serves a frozen page the way a real server does,
-                               compressed or plain, as your own site does.
-                               Homework 2 asks you to use it, due Wed 30 Sep;
-                               Session 4 shows you how.
-localise-frozen-copy.py        brings home the files your saved page still takes
-                               from the live site, so that optimising them shows
-                               in your measurement. See below.
-.gitignore                     keeps build noise out of your repository, and keeps
-                               pdf/ in it, so your history holds the exact PDF
-                               you submitted.
-LICENSE                        MIT. Replace <YOUR FULL NAME> before your first commit.
+pdf/short-paper-hpc.pdf          the paper
+src/short-paper-hpc.tex          its LaTeX source; src/refs.bib the references
+job/baseline/kc-py1.py           the frozen counter (never edited)
+job/run-baseline.sh              the frozen baseline Slurm script (exclusive node)
+job/run-baseline-energy.sh       the same run, bracketed by RAPL energy readings
+job/optimised/                   the optimisation: run-rightsized.sh, build-cython.sh, run-cython.sh
+job/optimised/rejected/          an earlier rewrite of the counter, kept as a record only
+job/tool/                        allocation-footprint.py, the reusable tool, with its own README
+job/measurements/                the evidence: logs, Slurm accounting records, calculation scripts,
+                                 dated summaries, exported AI-agent sessions
+job/measurements/README.md       the source register: commands, dates, job IDs, hashes, sources
+.opencode/agents/                the AI coding agents used for the optimisation and the tool
+opencode.json                    the pinned course model for those agents
 ```
 
-Put your figures in `src/` as well; `\includegraphics{myfigure.png}` will find them.
+## Reproduce
 
-## Build
+**The input.** It is not stored here. Download it and check its SHA-256:
 
-One command, the same on Windows, macOS and Linux. Run it from **this** directory, not from
-`src/`:
-
-```
-latexmk
-```
-
-It builds every document left in `src/` and writes `pdf/short-paper-mics.pdf` or
-`pdf/short-paper-hpc.pdf`, then `pdf/peer-review-1.pdf`, `pdf/peer-review-2.pdf` and
-`pdf/response-to-reviewers.pdf`.
-
-`latexmk` ships with both TeX Live and MiKTeX, so if you can compile LaTeX at all, you already
-have it. It reruns the compiler as many times as your cross-references and bibliography need,
-which is why there is no build script here to get out of date.
-
-To build just one document while you are working on it:
-
-```
-latexmk src/short-paper-mics.tex
+```sh
+mkdir -p job/data
+curl -L -o job/data/M_abscessus_HiSeq_10M.fa.gz \
+  https://github.com/lh3/kmer-cnt/releases/download/v0.1/M_abscessus_HiSeq_10M.fa.gz
+sha256sum job/data/M_abscessus_HiSeq_10M.fa.gz
+# dd2ef49aebabfed1574b55fd002025f29b2fda88c70b2095f5e1b3a822cee736
 ```
 
-Two more commands you may want:
+**The counter, locally** (Python 3, standard library only). The one-read test prints `1<TAB>1`; a
+full run prints 255 lines with SHA-256 `06a32de7…bf42`:
 
-```
-latexmk -c    # delete the build artefacts, keep the PDFs
-latexmk -C    # delete the build artefacts and the PDFs
-```
-
-`pdf/` holds nothing but the finished PDFs: the intermediate `.aux`, `.log` and `.bbl`
-files go to `.aux/`. That is deliberate: you upload out of `pdf/`, so nothing else is allowed
-to land there.
-
-## Serve a frozen page
-
-**Web page track.** An HPC job is frozen by pinning a commit and a fixed input instead, and
-Session 3 covers that; the rest of this section is for the page.
-
-Four steps. Run every command from **this** directory, not from `webpage/`.
-
-**1. Freeze.** In Chrome, dismiss the cookie banner, then scroll to the bottom of the page: what
-loads while you scroll is part of the page your functional unit describes, and a banner left open
-freezes into the copy. Then "Save Page As…", *Web Page, Complete*, and put the `.html` file and its
-`_files/` folder in `webpage/`.
-
-**2. Bring home what the freeze left online.** The saved page still takes some of its files from
-the live site: images chosen through `srcset`, SVG icon sprites, fonts named by a stylesheet. The
-browser keeps fetching those from the internet, so optimising them on disk would change nothing
-you measure. Run:
-
-```
-python3 localise-frozen-copy.py webpage/<your-page>.html
+```sh
+printf '>read1\nACGTACGTACGTACGTACGTACGTACGTACG\n' | python3 job/baseline/kc-py1.py | awk '$2 != 0'
+gzip -cd job/data/M_abscessus_HiSeq_10M.fa.gz | python3 job/baseline/kc-py1.py | sha256sum
 ```
 
-It leaves your copy untouched and writes `webpage/<your-page>-local.html` beside it, with its own
-`<your-page>-local_files/` folder: every file the HTML or the CSS names on your site, its domain and
-its subdomains, is downloaded there and pointed to. **The `-local` copy is the one you measure and
-optimise.** Third parties stay online on purpose: analytics, consent banners, maps and chat widgets
-are part of what a visitor downloads, and the script lists the ones it saw.
+**The runs, on Aion** (from the repository root on a login node; see `job/README.md`):
 
-**3. Serve it the way your own site does.** Open your **live** page, DevTools > Network, add the
-*Content-Encoding* column (right-click a column header > Response Headers), reload, and look at
-the JS and CSS rows. If they show `gzip`, `br` or `zstd`, your site compresses:
-
-```
-python3 serve-frozen-copy.py 8000
+```sh
+sbatch job/run-baseline.sh                  # baseline, exclusive node
+sbatch job/optimised/run-rightsized.sh      # same program, 6 cores and 10G on a shared node
+sbatch job/optimised/build-cython.sh        # once: compile the unchanged source with Cython
+sbatch job/optimised/run-cython.sh          # the compiled program, same request
 ```
 
-If the column is empty, your site sends them uncompressed:
+**The numbers, anywhere** (Python 3, standard library only; each prints to stdout and is compared
+with its dated summary in `job/measurements/`):
 
-```
-python3 serve-frozen-copy.py 8000 --no-gzip
-```
-
-Then open `http://localhost:8000/webpage/<your-page>-local.html`. The server serves the directory
-you start it from. Measure from there. `python3 -m http.server` sends everything uncompressed
-whatever your site does. Fonts and images pass through unchanged, while HTML, CSS and JavaScript
-arrive three to seven times heavier, so it moves your hotspot instead of inflating a total: on
-`rtl.lu`, code measured 1.2 MB compressed against 5.2 MB plain, which points the optimisation at
-JavaScript on a page whose problem is a 1.07 MB PNG (eleven pages measured 2026-08-20).
-
-**4. Check the copy.** DevTools > Network, add the *Domain* column, reload. Every row from your own
-site says `localhost`; what remains is third parties and the calls scripts make while the page
-runs. Reload three times. If a third party changes size between loads, right-click its row, *Block
-request domain*, keep that same block for your before and your after, and list the blocked domains
-in your paper. The server's terminal prints every 404: that list is what the freeze missed.
-
-**One file, fetched twice.** If the *Domain* column shows the same file coming from `localhost`
-and from its own host, your copy pays for it twice: Chrome saved the tag a script had injected,
-and that script injects its own again on every load. Try
-
-```
-python3 localise-frozen-copy.py webpage/<your-page>.html --drop-injected
+```sh
+python3 job/measurements/lcia-calculation.py              # baseline footprint, Section III
+python3 job/measurements/optimised-calculation.py 16225121 16225125 16225129 16225133 16225137
+python3 job/measurements/payback-calculation.py           # cost, saving and payback, Section V
 ```
 
-serve the copy again and compare. On `animals.sandiegozoo.org` the copy went from 12 % heavier
-than the live page to 1 % (measured 2026-09-22). Keep the plain command when your page is built
-by JavaScript, where the loader does not replace what the option removes.
+**The tool, on any finished Slurm job:**
 
-Stop it with Ctrl+C in its terminal, or, if it runs elsewhere:
-
-```
-lsof -ti tcp:8000 | xargs kill
+```sh
+python3 job/tool/allocation-footprint.py --sacct job/measurements/sacct-16225121.txt
+python3 job/tool/allocation-footprint.py --job JOBID      # on a cluster with sacct
 ```
 
-## The short paper compiles as shipped
+## Building the paper
 
-So do the other documents. Build it once before you write anything: if `latexmk` works today, then
-any later failure is something you just changed, which is a much smaller problem to debug the
-evening before a deadline.
+`latexmk` from the repository root builds every document in `src/` into `pdf/` (pdfLaTeX).
 
-Minimum 4 double-column pages for the paper, excluding appendices and references.
+## License
 
-## Note for AI coding agents
-
-Build with `latexmk` from this directory. Do not write a build script and do not call `pdflatex`
-directly: the settings in `latexmkrc` are what make the build reproducible, and `latexmk` handles
-the reruns. Every document compiles with pdfLaTeX; they need no XeLaTeX and no LuaLaTeX.
-`src/short-paper-mics.tex` and `src/short-paper-hpc.tex` are two tracks of the same paper and the
-author writes one of them, so do not merge them and do not restore a file the author deleted.
-
-Sources are in `src/`, output goes to `pdf/`. `latexmkrc` puts `src/` on `TEXINPUTS` and
-`BIBINPUTS`, which is why `\bibliography{refs}` resolves to `src/refs.bib`. Do not "fix" those
-paths to point at `src/` explicitly, it will break the build.
+MIT, see `LICENSE`.

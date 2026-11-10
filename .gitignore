@@ -15,3 +15,6 @@ build.sh
 AGENTS.md
 CLAUDE.md
 Claude\ outputs/
+
+# Python bytecode from the measurement scripts
+__pycache__/

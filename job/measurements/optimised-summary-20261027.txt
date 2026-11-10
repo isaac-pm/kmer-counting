@@ -1,0 +1,18 @@
+UTC calculation: 2026-10-27T21:04:29+00:00
+$ python3 job/measurements/optimised-calculation.py 16118792 16118794 16118796 16118798 16118800
+Idle packages 182.642 W (1.427 W per core held) | program increment 5.217 W per busy core (median of 5 RAPL runs)
+Grid 337.0 gCO2e/kWh | PUE 1.36 | memory 0.3725 W/GB | hardware 913.7 kg over 189345600 s
+Check, baseline allocation (128 cores, 256 GB, median aion-0144 run): 103071 J, 14.879 gCO2e (lcia-calculation.py: 103146 J, 14.888 g)
+
+JOBID|node|cores|reserved GB|Elapsed s|TotalCPU s|MaxRSS GiB|node J|gCO2e
+16118792|aion-0046|4|7.13|323|319.1|5.67|4366|0.605
+16118794|aion-0046|4|7.13|323|320.3|5.67|4373|0.605
+16118796|aion-0037|4|7.13|325|319.0|5.67|4383|0.607
+16118798|aion-0037|4|7.13|325|319.3|5.67|4384|0.607
+16118800|aion-0037|4|7.13|329|325.2|5.67|4448|0.616
+Median Elapsed 325 s (range 323-329); median TotalCPU 319.3 s; median MaxRSS 5.67 GiB
+Median parts: idle share 1855 J | program 1666 J | memory 863 J | node 4383 J
+Median operational 0.558 g + embodied 0.0490 g = 0.607 gCO2e per run (range 0.605-0.616)
+Saving per run against the baseline 14.888 g: 14.281 gCO2e
+Model, frozen counter right-sized (6 cores, 10 GiB) at baseline timing: 0.904 gCO2e
+Shared-node energy is attributed, not measured; Section VI names the limits.

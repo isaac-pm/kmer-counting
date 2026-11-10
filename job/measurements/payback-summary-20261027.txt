@@ -1,0 +1,7 @@
+$ python3 job/measurements/payback-calculation.py
+OpenCode sessions: 8, 67 requests, 38058 output tokens incl. reasoning -> 13.210 gCO2e
+Aion runs: five measured runs 3.040 g + three failed runs 0.0105 g + 8 collectors 0.0037 g = 3.054 gCO2e
+Cost of producing the optimisation: 16.265 gCO2e
+Saving per run: 14.888 - 0.607 = 14.281 gCO2e
+Payback: 16.265 / 14.281 = 1.14 runs -> 4.2 days at 100 runs per year
+AI part only: 0.93 runs | runs part only: 0.21 runs

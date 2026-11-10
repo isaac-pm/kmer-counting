@@ -1,0 +1,29 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) env/release/default
+Node: aion-0089
+Job ID: 16225112
+Cython version 3.0.10
+gcc (GCC) 13.2.0
+Python 3.11.5
+env/release/default
+compiler/GCCcore/13.2.0
+lib/zlib/1.2.13-GCCcore-13.2.0
+tools/binutils/2.40-GCCcore-13.2.0
+tools/bzip2/1.0.8-GCCcore-13.2.0
+devel/ncurses/6.4-GCCcore-13.2.0
+lib/libreadline/8.2-GCCcore-13.2.0
+lang/Tcl/8.6.13-GCCcore-13.2.0
+devel/SQLite/3.43.1-GCCcore-13.2.0
+tools/XZ/5.4.4-GCCcore-13.2.0
+lib/libffi/3.4.4-GCCcore-13.2.0
+system/OpenSSL/1.1
+lang/Python/3.11.5-GCCcore-13.2.0
+lang/Cython/3.0.10-GCCcore-13.2.0
+SHA-256 of source:  4628ab8d2335fbfd0da46f54dc5e8ac9b0b32e3f9df038a7993ed72ccf9d0438
+SHA-256 of C file:  ea9d5015b003c15280491a4cb96d683ca8ce29fda5f92c9d40cdfd496d87ce6b
+SHA-256 of exe:     dae47ccbaaab4df9a871cd66186eaa7b26e1129e3557131b5611f6d32e004bc1
+One-read test output: 1	1
+One-read test passed.
+Executable: job/optimised/build/kc-py1-cython

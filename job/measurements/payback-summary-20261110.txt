@@ -1,0 +1,26 @@
+$ python3 job/measurements/payback-calculation.py
+Baseline 14.888 gCO2e per run (exclusive node, aion-0144 RAPL series)
+  right-sized: 0.911 gCO2e per run, five runs 4.579 g, median Elapsed 367 s on aion-0091, aion-0167
+  right-sized + Cython: 0.844 gCO2e per run, five runs 4.233 g, median Elapsed 340 s on aion-0091, aion-0167
+Chosen: right-sized + Cython, 0.844 gCO2e per run
+
+Kept OpenCode sessions: 10, 62 requests, 27924 output tokens incl. reasoning -> 9.693 gCO2e
+  short job 16118778 kmer-optimised FAILED: 5 cores, 8.59 GB, 3 s -> 0.0045 g
+  short job 16118780 kmer-optimised FAILED: 5 cores, 8.59 GB, 2 s -> 0.0030 g
+  short job 16118782 kmer-optimised FAILED: 5 cores, 8.59 GB, 2 s -> 0.0030 g
+  short job 16225100 kmer-cython-build FAILED: 1 cores, 1.84 GB, 3 s -> 0.0009 g
+  short job 16225112 kmer-cython-build COMPLETED: 1 cores, 1.84 GB, 5 s -> 0.0015 g
+  short job 16225101 kmer-optimised COMPLETED: 6 cores, 10.74 GB, 12 s -> 0.0219 g
+  short job 16225113 kmer-optimised COMPLETED: 6 cores, 10.74 GB, 11 s -> 0.0201 g
+Aion runs: ten measured runs 8.812 g + 7 short jobs 0.0550 g + 13 collectors 0.0060 g = 8.873 gCO2e
+Cost of producing the optimisation (kept path): 18.566 gCO2e
+Saving per run: 14.888 - 0.844 = 14.044 gCO2e
+Payback: 18.566 / 14.044 = 1.32 runs -> 4.8 days at 100 runs per year
+AI part only: 0.69 runs | runs part only: 0.63 runs
+
+Section VI sensitivities
+Discarded path (rewritten counter), not counted: 1 session, 30 requests, 7.057 g + five runs 3.040 g + 5 collectors = 10.100 g; if counted, payback 2.04 runs
+AI assistance x10: payback 7.53 runs -> 28 days
+AI service grid +100 gCO2e/kWh: +2.88 g cost, +0.20 runs; at twice 337: payback 2.01 runs
+Freed cores left idle (whole-node idle draw over the median walltime): 8.380 g per run, saving 6.51 g, payback 2.85 runs
+Cython lever alone: cost 7.302 g, saving 0.067 g per run over the right-sized script (7.4 % shorter walltime), payback 109 runs -> 13 months

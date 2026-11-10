@@ -65,3 +65,16 @@ The one-read test should print `1` and `1` separated by a tab. A successful full
 To smoke test the batch script with another compressed FASTA, set `INPUT_FASTA_GZ` in the submission environment, for example `sbatch --export=ALL,INPUT_FASTA_GZ=/path/to/small.fa.gz --time=00:10:00 job/run-baseline.sh`.
 
 Cluster guidance: [SSH](https://hpc-docs.uni.lu/connect/ssh/), [interactive jobs](https://hpc-docs.uni.lu/jobs/interactive/), [modules](https://hpc-docs.uni.lu/environment/modules/), [launcher examples](https://hpc-docs.uni.lu/slurm/launchers/).
+
+## Optimised runs (program unchanged)
+
+`optimised/` changes only what surrounds `baseline/kc-py1.py`, which runs byte-identical:
+
+```bash
+sbatch job/optimised/run-rightsized.sh            # frozen counter, 6 cores, 10G, shared node
+sbatch job/optimised/build-cython.sh              # once: Cython build of the unchanged source
+sbatch job/optimised/run-cython.sh                # the compiled build, same request
+sbatch --dependency=afterany:JOBID job/optimised/collect-optimised.sh JOBID
+```
+
+`build-cython.sh` prints the SHA-256 of the source it compiled, so the log shows it is the frozen file. `optimised/rejected/` keeps an earlier rewrite of the counter as a record only; do not run it.

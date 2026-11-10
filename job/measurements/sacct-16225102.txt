@@ -1,0 +1,2 @@
+JobID|JobName|User|Partition|NodeList|AllocNodes|AllocCPUS|ReqMem|MaxRSS|Elapsed|TotalCPU|ConsumedEnergy|ConsumedEnergyRaw|MaxDiskRead|MaxDiskWrite|State|ExitCode
+16225102|kmer-optimised|ipalmamedina|batch|None assigned|0|0|10G||00:00:00|00:00:00|0|0|||CANCELLED|0:0

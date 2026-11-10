@@ -92,3 +92,77 @@ For a transparent full-node energy substitute, Lannelongue's Section 5 formula c
 | Runs per year | Student estimate given 2026-09-29 | **100 runs/year**, an explicit usage **assumption for Section VI**, not an observed III.B inventory value. At the 368-second baseline median, this would occupy 36,800 node-seconds (about 10.2 node-hours) per year. |
 
 The local course file `S3-LCA-goal-and-scope.pdf`, slide 14, places sourced items in III.B and unsourced assumptions in Section VI. `S4-LCI-life-cycle-inventory.pdf`, slide 17, specifies the HW2 sections and deadline. The shared bibliography PDFs named in Session 4 were not present in the local course directory; the publisher and ULHPC sources linked above were read directly.
+
+## Input facts, checked 2026-10-27
+
+Run locally from the repository root on the input whose SHA-256 begins `dd2ef49aebabfed1` (the frozen input above). These back the read count in Section I and the lower-case check in Section III.A of the paper.
+
+```
+gzip -cd job/data/M_abscessus_HiSeq_10M.fa.gz |
+  awk '/^>/{n++; next} /[acgtn]/{l++} END{print "records",n,"lowercase_lines",l+0}'
+```
+
+Output: `records 5000000 lowercase_lines 0`. `kc-py1.py` upper-cases only the last record, so a lower-case base elsewhere would be counted as a distinct 31-mer; with no lower-case sequence line in this input, that behaviour does not affect the histogram.
+
+## HW4: AI-assisted optimisation and payback, 2026-10-27
+
+All optimisation changes were made by OpenCode 1.19.3 with the pinned course model `openrouter/deepseek/deepseek-v4-flash-0731` (`opencode.json` unchanged). Agent files: `.opencode/agents/optimiser.md` and `builder.md` (model pinned, variant `low`, `steps: 30`, bash allow-list, no ssh/sbatch/git) plus `reader.md`; a five-line git-ignored `AGENTS.md` replaces the `CLAUDE.md` fallback, and every run used `OPENCODE_DISABLE_CLAUDE_CODE=1`, `--title` (avoids a title request to a different small model) and stdin closed (`</dev/null`; with stdin open, `opencode run` waited without creating a session and spent no tokens).
+
+- Fixed cost of a one-word request (input tokens): 12,365 unconfigured (default agent, `CLAUDE.md` fallback); 5,920 with the optimiser agent; 4,786 with the reader agent.
+- Sessions, exported with `opencode export --sanitize ID > opencode-ID.json`: two smoke tests, one optimiser diagnostic, optimiser task 1 (counter, 30 requests, step cap reached), task 2 (job script), task 3 (srun fix, resumed once for the memory margin), builder (tool, resumed once for the `--ntasks` fix), builder fix (Python 3.6). `python3 job/measurements/opencode-usage.py` sums them: 67 requests, 19,878 output + 18,180 reasoning tokens, 13.210 gCO2e at 1.03 Wh/1000 output tokens and 337 g/kWh.
+- Author's checks: `kc-py1-opt.py` on the full input on the author's laptop (Python 3.14.4): SHA-256 `06a32de7…bf42`, 255.67 s, peak RSS 5,925,364 KB.
+- Aion policy read 2026-10-27: `scontrol show partition batch` gives `MaxMemPerCPU=1750` (`CR_CORE_MEMORY`); `sinfo -p batch` showed 132 mixed nodes.
+- Runs: `optimised-submissions-20261027.txt`. First submission (1 core, 8G) jobs 16118778/80/82 FAILED in 2–3 s with `srun: fatal: cpus-per-task set by two different environment variables SLURM_CPUS_PER_TASK=5 != SLURM_TRES_PER_TASK=cpu=1`; 16118784–87 cancelled before start. After the agent's fix (4 cores, 6800M, `run-optimised.sh` SHA-256 `ecd3ce65…5fb4`), jobs 16118792/94/96/98/800 COMPLETED on aion-0046 and aion-0037, all with the reference histogram hash; collectors copied `optimised-JOBID.txt`, `sacct-JOBID.txt`, `node-NODE.txt`.
+- `python3 job/measurements/optimised-calculation.py 16118792 16118794 16118796 16118798 16118800` → `optimised-summary-20261027.txt`: 0.607 gCO2e per run (range 0.605–0.616), saving 14.281 g; the same chain on the baseline allocation gives 14.879 g (lcia: 14.888 g). Shared-node energy is attributed (idle share by cores held, program increment 5.217 W per busy core from the aion-0144 RAPL series, memory model on ReqMem), not measured.
+- `python3 job/measurements/payback-calculation.py` → `payback-summary-20261027.txt`: cost 16.265 g (AI 13.210 g + Aion runs 3.054 g), payback 1.14 runs.
+- Tool `job/tool/allocation-footprint.py`, run live on the Aion login node (Python 3.6.8): job 16118792 → 0.60 g; job 15861674 (idle measurement) → 2.45 g; job 16118778 → `error: job state is 'FAILED', not COMPLETED`, exit 1.
+
+Wrong or rejected agent output (for Appendix B): (1) claimed the new counter's peak is "well under 1 GiB" — measured 5.65 GiB; (2) its first job script (1 core, 8G) failed on Aion because of `MaxMemPerCPU`; (3) estimated "~2–4 gCO2e per run" after optimisation — attributed 0.607 g; (4) called a 6 % memory margin (6G) "comfortable" — raised to 6800M on request; (5) the tool printed `--ntasks-per-node=N`, which would launch N copies — corrected; (6) the tool used `subprocess(text=True)`, unavailable on the Aion login node's Python 3.6 — corrected; (7) its README called the 913.7 kg figure a hardware mass — corrected.
+
+### Related Work references, verified 2026-10-27
+
+Each DOI was resolved through `https://doi.org/api/handles/DOI` (response code 1) and its metadata checked on Crossref; the full text was read in the course bibliography PDF (`/home/isaac/Downloads/biblio`) at the passage cited.
+
+| Reference | DOI → landing page | Venue | Passage read |
+| --- | --- | --- | --- |
+| Wadenstein & Vanderbauwhede 2025 | 10.1140/epjc/s10052-025-14650-8 → link.springer.com | Eur. Phys. J. C 85(8):913 | Abstract; Section 6 Conclusions |
+| Lakim et al. 2022 | 10.18653/v1/2022.bigscience-1.8 → aclanthology.org | Proc. BigScience Episode #5 Workshop, ACL, pp. 84–94 | Discussion (idle power, 4 % R&D experiments) |
+| Avgerinou et al. 2017 | 10.3390/en10101470 → mdpi.com | Energies 10(10):1470 | Abstract (PUE declining yearly) |
+| Elsworth et al. 2025 | 10.48550/arXiv.2508.15734 → arxiv.org (no Crossref record; preprint) | arXiv preprint, not peer reviewed | Abstract; "Idle Machine energy" in the methodology list; results paragraph with the 1.72 scaling |
+| Oviedo et al. 2026 | 10.1016/j.joule.2026.102430 → Elsevier (403 to the fetcher) | Joule 10(8):102430 | Author version arXiv:2509.20241v2: abstract (0.31 Wh/query) and Fig. 2 caption (300 median output tokens) → 1.03 Wh/1000 output tokens |
+| Lannelongue et al. 2021 | 10.1002/advs.202100707 → Wiley | Adv. Sci. 8(12):2100707 | Section 5 (already used in III.B) |
+
+Checked 2026-10-28 after an external reference review:
+
+- AR5 (Myhre et al. 2013), Chapter 8 PDF from ipcc.ch: note to Table 8.7, "These values do not include CO2 from methane oxidation. Values for fossil methane are higher by 1 and 2 for the 20 and 100 year metrics"; Table 8.A.1 lists fossil methane GWP100 = 30. III.C now compares fossil methane 30 → 29.8 (AR6), not 28 → 29.8.
+- EU data-centre report: authors from the imprint page of `/home/isaac/Downloads/biblio/hpc/2025-EC-Energy-Performance-of-EU-Data-Centres.pdf` (Heatubun, Dragan, Bolchi, Lopes Bautista, Hinterholzer, Hintemann, Marx, Furda); PUE 1.36 is weighted by total energy consumption, n = 681.
+- Oviedo et al., arXiv:2509.20241v2 (PDF): the standard query assumes 500 input tokens and 300 median output tokens; very long inputs raise prefill energy "substantially".
+- Session 8 slides, slide 11: course factor 1.03 Wh per 1 000 output tokens, converted with "your grid factor (Section III.C)".
+- OpenRouter models API (`https://openrouter.ai/api/v1/models`), read 2026-10-28: `deepseek/deepseek-v4-flash-0731` is "a sparse mixture-of-experts model from DeepSeek, with 13B active parameters out of 284B total". `opencode.json` routes it to novita, deepinfra or inceptron (no fallbacks); the session exports do not record which provider served a request.
+- Avgerinou et al. 2017: the PUE trend covers reporting years 2009 to end of 2016.
+
+## HW4 revision: optimise around the code only, 2026-11-10
+
+Tutoring session, early November 2026: the optimisation may change only what surrounds the program (allocation, interpreter, compilation of the unchanged source), never `kc-py1.py` itself. The HW4 section above is therefore **superseded** for Sections IV–V: its counter rewrite is discarded.
+
+- Rejected files moved to `job/optimised/rejected/` (README there): `kc-py1-opt.py` (SHA-256 `282b58df…68635`) and the `run-optimised.sh` that ran it (`ecd3ce65…5fb4`). `optimised-summary-20261027.txt` and `payback-summary-20261027.txt` describe that discarded path and are kept unchanged as records.
+- `.opencode/agents/optimiser.md` rewritten: never edit, copy-and-modify or rewrite the program; allowed levers are the Slurm request and how the unchanged source runs; site facts (MaxMemPerCPU=1750, `lang/Cython/3.0.10-GCCcore-13.2.0` in release 2023b = `env/release/default` → `rhel810-20250803`, checked on the Aion login node 2026-11-10); `bash -n` added to the allow-list.
+- OpenCode is now **2.2.0**; export is `opencode session export --sanitize ID` and the JSON format changed (flat messages with `type`). `opencode-usage.py` reads both formats; the eight 1.x exports still sum to 13.210 g.
+- Sessions (optimiser agent, run with `opencode run --agent optimiser --format json --title … </dev/null`, `OPENCODE_DISABLE_CLAUDE_CODE=1`, started by Claude Code at the author's request):
+  - `ses_e39d393d9ffexQ0DAMS0O5nJFq` right-sized script `job/optimised/run-rightsized.sh` (6 cores, 10G, 10 min, no `--exclusive`; 1.25 × 7.40 GiB → 10 GiB; 10240/1750 → 6 cores): 4 requests, 1,427 output tokens, 0.495 g.
+  - `ses_e39d28e96ffe2cY33z7sMiWjMB` `build-cython.sh` + `run-cython.sh`: 15 requests, 7,307 output tokens, 2.536 g.
+  - `ses_e39ce6350ffegS7XjYZprykhxy` build fix (`--module-name kc_py1`): 6 requests, 1,464 output tokens, 0.508 g.
+- Smoke tests on a 100,000-read sample (`gzip -cd … | head -n 200000 | gzip` → `$SCRATCH/kmer-counting/sample-100k.fa.gz`, SHA-256 `ce17aa5a…2126`); frozen counter on the laptop: histogram `9d6e6f8f…2553`.
+  - 16225100 build FAILED in 3 s: `'kc-py1' is not a valid module name` (`cython-build-16225100.txt`); 16225102 (Cython smoke) cancelled by the dependency before start.
+  - 16225101 right-sized smoke, aion-0091, 8.01 s, histogram `9d6e6f8f…2553` (`smoke-16225101.txt`).
+  - 16225112 build COMPLETED on aion-0089: Cython 3.0.10, GCC 13.2.0, Python 3.11.5; source `4628ab8d…0438` (frozen `kc-py1.py`), C `ea9d5015…6b`, executable `dae47ccb…4bc1`; one-read test `1<TAB>1` (`cython-build-16225112.txt`).
+  - 16225113 Cython smoke, aion-0091, 7.46 s, histogram `9d6e6f8f…2553` (`smoke-16225113.txt`).
+- Measured runs: `optimised-submissions-20261110.txt` (hashes of program, scripts, build, input; submitted 2026-11-10T16:04:02Z, alternating variants, `--dependency=singleton`, collector after each). Right-sized: 16225119, 123, 127, 131, 135. Cython: 16225121, 125, 129, 133, 137. All COMPLETED 0:0 with histogram `06a32de7…bf42`, MaxRSS 7.40 GiB; nodes aion-0167 (8 runs) and aion-0091 (2 runs), shared with other jobs.
+- `python3 job/measurements/optimised-calculation.py 16225119 16225123 16225127 16225131 16225135` → `optimised-summary-rightsized-20261110.txt`: median Elapsed 367 s (362–377), 0.911 gCO2e per run (0.899–0.936). The model line of the 20261027 summary (frozen counter right-sized at baseline timing) predicted 0.904 g.
+- `python3 job/measurements/optimised-calculation.py 16225121 16225125 16225129 16225133 16225137` → `optimised-summary-cython-20261110.txt`: median Elapsed 340 s (335–351), 0.844 gCO2e per run (0.832–0.872); saving 14.044 g.
+- `python3 job/measurements/payback-calculation.py` (rewritten 2026-11-10: kept path only) → `payback-summary-20261110.txt`: AI 9.693 g (10 sessions, 62 requests, 27,924 output tokens; session `ses_e80fda1a…` excluded) + Aion 8.873 g (ten measured runs 8.812 g, seven short jobs from their sacct records 0.055 g, 13 collectors at 1 core/256 MB/2 s 0.006 g) = 18.566 g; payback 1.32 runs (4.8 days at 100/year). Sensitivities: discarded path 10.100 g (payback 2.04 runs if counted); AI ×10 → 7.53 runs; AI grid +100 g/kWh → +0.20 runs; freed cores idle → saving 6.51 g, payback 2.85 runs; Cython lever alone 7.302 g / 0.067 g per run → 109 runs (13 months).
+- Tool check: `python3 job/tool/allocation-footprint.py --sacct job/measurements/sacct-16225119.txt` → 0.92 g, recommends 6 cores/10 GiB (saving 0.00); `--sacct …/sacct-16225121.txt` → 0.84 g, same recommendation.
+
+Equal-node assumption (stated in III.A and VI): right-sized aion-0091 372 s vs aion-0167 median 366.5 s; Cython aion-0091 335 s vs aion-0167 median 341 s; spread on aion-0167 alone about 4 %. Earlier evidence: baseline aion-0127 368 s vs aion-0144 364 s; idle aion-0234 178.6 W vs aion-0144 182.6 W.
+
+Wrong or rejected agent output (for Appendix B, items 8–10): (8) the first Cython build named the module after the file (`kc-py1`, invalid); (9) it described the `--embed` executable as having "no interpreter startup" — it embeds and starts CPython; (10) after the fix, it gave the histogram SHA-256 `06a32de…f42` as the expected source SHA-256 (the source is `4628ab8d…0438`).

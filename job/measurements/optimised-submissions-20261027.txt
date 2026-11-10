@@ -1,0 +1,22 @@
+Submitted 2026-10-27T20:27:11Z from /mnt/aiongpfs/users/ipalmamedina/kmer-counting on access1
+282b58dfe3221a7c45c788b66f173898915cf654fc2d85b33e03844a7dc68635  job/optimised/kc-py1-opt.py
+21565dd5986ad1da16f91d8a2526a03e82efef7cd51b7098c7ff2bc3cb27cd2a  job/optimised/run-optimised.sh
+24f9e8583a140888b16775e327391b94e8846c1b50748498c3be0618f21463ee  job/optimised/collect-optimised.sh
+dd2ef49aebabfed1574b55fd002025f29b2fda88c70b2095f5e1b3a822cee736  job/data/M_abscessus_HiSeq_10M.fa.gz
+Command per run: sbatch --parsable --dependency=singleton job/optimised/run-optimised.sh; sbatch --parsable --dependency=afterany:JOBID job/optimised/collect-optimised.sh JOBID
+run 1: 16118778 collector 16118779
+run 2: 16118780 collector 16118781
+run 3: 16118782 collector 16118783
+run 4: 16118784 collector 16118785
+run 5: 16118786 collector 16118787
+2026-10-27T20:30:55Z runs 16118778, 16118780, 16118782 FAILED in 2-3 s: srun: fatal: cpus-per-task set by two different environment variables SLURM_CPUS_PER_TASK=5 != SLURM_TRES_PER_TASK=cpu=1 (MaxMemPerCPU=1750 raised cpus-per-task to 5 for --mem=8G). Cancelled 16118784-16118787 before they started.
+
+Resubmitted 2026-10-27T20:31:59Z after the agent fixed the request (4 cores, 6800M)
+282b58dfe3221a7c45c788b66f173898915cf654fc2d85b33e03844a7dc68635  job/optimised/kc-py1-opt.py
+ecd3ce65772a3815973e70d0f259b75682b90e0968dca92a6d9bf85858455fb4  job/optimised/run-optimised.sh
+24f9e8583a140888b16775e327391b94e8846c1b50748498c3be0618f21463ee  job/optimised/collect-optimised.sh
+run 1: 16118792 collector 16118793
+run 2: 16118794 collector 16118795
+run 3: 16118796 collector 16118797
+run 4: 16118798 collector 16118799
+run 5: 16118800 collector 16118801

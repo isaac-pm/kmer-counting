@@ -1,0 +1,5 @@
+JobID|JobName|User|Partition|NodeList|AllocNodes|AllocCPUS|ReqMem|MaxRSS|Elapsed|TotalCPU|ConsumedEnergy|ConsumedEnergyRaw|MaxDiskRead|MaxDiskWrite|State|ExitCode
+16225125|kmer-optimised|ipalmamedina|batch|aion-0167|1|6|10G||00:05:40|05:46.203|||||COMPLETED|0:0
+16225125.batch|batch|||aion-0167|1|6||37864K|00:05:40|00:09.257|||879.21M|680.72M|COMPLETED|0:0
+16225125.extern|extern|||aion-0167|1|6|||00:05:40|00:00:00|||||COMPLETED|0:0
+16225125.0|time|||aion-0167|1|6||7759936K|00:05:39|05:36.946|||680.66M|0.00M|COMPLETED|0:0

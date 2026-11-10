@@ -29,6 +29,13 @@
 \guidancefalse
 \newcommand{\guidance}[1]{\ifguidance{\itshape\small #1\par\medskip}\fi}
 
+% The repository that identifies the job (Sections III-A and IV-D).
+% Set \repocommit to the full hash of the pushed commit before submitting.
+\newcommand{\repourl}{\url{https://github.com/isaac-pm/kmer-counting}}
+\newcommand{\repocommit}{\textbf{COMMIT-HASH-PENDING}}
+% Total AI assistance in gCO2e, the sum of the Appendix B entries; update it with them.
+\newcommand{\aitotal}{47.7}
+
 \begin{document}
 
 \title{Life Cycle Assessment of Exact 31-mer Counting on an HPC Node: Carbon Payback of an AI-Assisted Optimisation}
@@ -46,12 +53,22 @@ isaac.palma.001@student.uni.lu\\[2pt]
 
 
 \begin{abstract}
-\guidance{Maximum 200 words, one paragraph. State the job assessed, the
-research question, what you did, the headline numbers (baseline
-gCO\textsubscript{2}e per run, post-optimisation gCO\textsubscript{2}e per run,
-payback in runs), \textbf{all three measured the same way and each named with
-the partition and the allocation shape they were measured on}, and what
-generalises beyond your job. Every sentence states a result.}
+On a shared high-performance computing cluster, a job is charged for all the
+hardware it reserves, used or not. This paper measures the carbon footprint of
+one such job, finds which resource carries it, and asks whether an AI-assisted
+optimisation of that resource repays its own footprint. The job counts every
+31-mer in 5\,000\,000 DNA reads with a single-threaded Python program, on a
+whole 128-core node of the Aion cluster, partition \texttt{batch}. A life cycle
+assessment built on processor energy counters puts one run at
+15~gCO\textsubscript{2}e on that exclusive node. The idle draw of the processors
+carries 57\,\% of it, the reserved memory 30\,\% and the program's own work
+1.6\,\%. An AI coding agent then changes only what surrounds the unchanged
+program: a request of 6~cores and 10~GiB on a shared node of the same
+partition, and a Cython build. With the same factors, one run is then
+attributed 0.84~g. The assistance and the test runs cost 18.6~g, which the
+saving repays in 1.32~runs. For a serial program on a shared cluster, the
+allocation, not the code, sets the footprint. A three-step method and a script
+carry this check to any batch job.
 \end{abstract}
 
 \guidance{\textbf{This is the HPC job track.} The archive also holds
@@ -78,600 +95,549 @@ than on a job, so every convention your paper runs on is stated in the paper.}
 % ---------------------------------------------------------------------
 
 \section{Introduction}\label{sec:intro}
-Computation draws electricity, and electricity carries a carbon footprint
-that depends on where and how it is generated~\cite{lannelongue2021}. On a
-shared high-performance computing (HPC) cluster, a user does not choose the
-hardware a job draws on: a scheduler, here Slurm, grants an allocation of nodes,
-cores and memory for a walltime, and the hardware is attributed to the job for
-that time whether the program uses it or not.
+Computing draws electricity, and the carbon footprint of that electricity
+depends on where and how it is generated~\cite{lannelongue2021}. On a shared
+high-performance computing (HPC) cluster, a scheduler grants each job an
+allocation: nodes, cores and memory, held for a walltime. The hardware a job
+holds is attributed to it, whether its program uses that hardware or not. A
+request can therefore cost far more than the computation it serves.
 
-The object of this study is one such job. It counts the exact canonical
-31-mers of 5\,000\,000 sequencing reads of a bacterium, \emph{Mycobacterium
-abscessus} (FASTA records counted on 19~October~2026), with
-\texttt{kc-py1.py}, a single-threaded Python counter written for
-teaching~\cite{kmercnt}. A $k$-mer is a substring of length $k$ of a DNA
-sequence. Counting them is a common first step in genome analysis. The job runs
-on the Aion cluster of the University of Luxembourg, and holds one 128-core node
-exclusively while its program uses one core.
+The object of this study is one such job. It counts exactly every 31-mer, a
+substring of 31 letters of a DNA sequence, in 5\,000\,000 sequencing reads of
+the bacterium \emph{Mycobacterium abscessus} (counted on 27~October~2026).
+Counting such substrings is a common first step in genome analysis. The
+counter, \texttt{kc-py1.py}, is a single-threaded Python program written for
+teaching~\cite{kmercnt}. The job runs on Aion, a cluster of the University of
+Luxembourg, where it holds a 128-core node exclusively while its program uses
+one core.
 
-The footprint of this job is invisible to its user. Slurm returns no energy
-figure for it (Section~\ref{sec:lci}), so the user sees a walltime and an exit
-code, and nothing that shows what the run costs the climate. The allocation
-shape, more than the program, may decide that cost. An optimisation guided by an
-AI coding agent also has a cost of its own: the AI assistance and the test runs
-it requires. It is worth doing only if the savings per run repay that cost
-within the life of the job.
+The scheduler reports no energy figure for this job (Section~\ref{sec:lci}).
+Its user sees a walltime and an exit code, but not what the run costs the
+climate. The allocation, more than the program, may set that cost. Correcting
+the allocation with an artificial intelligence (AI) coding agent has a
+footprint of its own, from the AI assistance and the test runs. Such a change is
+worth making only if each run saves enough to repay that footprint within the
+life of the job.
+
+This study measures the footprint with a life cycle assessment (LCA), the
+standard method for the environmental impact of a product over its
+life~\cite{iso14040,iso14044}. It counts greenhouse gases in grams of
+CO\textsubscript{2} equivalent (gCO\textsubscript{2}e): each gas counts as the
+mass of CO\textsubscript{2} that traps as much heat over 100~years, a measure
+called the global warming potential over 100~years, or GWP100~\cite{ipcc2021}.
 
 This paper answers the following research question: \emph{what is the GWP100
-carbon footprint of one run of an exact 31-mer counting job that holds an
-exclusive Aion node, which resource of that allocation carries it, and how many
-runs does an AI-assisted optimisation of that resource need to pay back its own
+carbon footprint of one run of an exact 31-mer counting job on an Aion node,
+which resource of the job's allocation carries most of it, and how many runs
+does an AI-assisted optimisation of that resource need to pay back its own
 footprint?} The first two parts concern one particular instance; the third
 concerns a means~\cite{shaw2003}.
 
-The contribution of this version is the baseline. It is a footprint per run
-that rests on CPU-package energy counters read by an ordinary user, because the
-scheduler's own energy fields are empty. It is completed by a declared model of
-memory power, a proxy power usage effectiveness and an allocated share of
-hardware production. Each figure is traceable to a measured value, a cited
-factor or a labelled assumption, and the scripts that recompute them are kept
-with the job.
+The paper makes four contributions. The first is a baseline footprint of
+15~gCO\textsubscript{2}e per run, built on processor energy counters that an
+ordinary user can read. The second is the footprint after an AI-assisted
+optimisation that leaves the program unchanged: 0.84~g per run. The third is
+the carbon payback of that optimisation, 1.32~runs. The fourth is a three-step
+method, with a script, that applies the same check to any batch job. Every
+figure traces back to a measured value, a cited factor or a stated assumption,
+and the scripts that recompute them are kept with the job.
 
-Section~II positions the study. Section~\ref{sec:goalscope} defines the job,
-the functional unit and the boundary. Section~\ref{sec:lci} inventories the
-measured flows. Section~\ref{sec:lcia} converts them into gCO\textsubscript{2}e
-per run, Section~\ref{sec:interpretation} interprets that figure, and
-Section~\ref{sec:reporting} names its hotspots. Section~\ref{sec:optimisation}
-attacks those hotspots, and Section~\ref{sec:payback} computes the carbon
-payback. Section~\ref{sec:threats} lists the threats to validity.
+Section~\ref{sec:related} reviews related work. Section~\ref{sec:lca} assesses
+the baseline job, from its scope to its hotspots. Section~\ref{sec:optimisation} attacks those hotspots, and
+Section~\ref{sec:payback} computes the payback. Section~\ref{sec:threats}
+discusses the threats to validity.
 
 % ---------------------------------------------------------------------
-\section{Related Work}
-\guidance{Between 3 and 5 references, \emph{all of them found by you}.
-Finding the work that surrounds your question is part of the exercise,
-and it is where an AI assistant needs checking most.
+\section{Related Work}\label{sec:related}
+Lannelongue et al.~\cite{lannelongue2021} estimate the footprint of a
+computation from its runtime, the cores and memory it uses, the grid intensity
+and the power usage effectiveness (PUE) of the data centre, in their Green
+Algorithms calculator. This study keeps their memory coefficient but replaces
+their processor term with measured energy. Cores held idle still draw power, and
+a model that counts only the busy cores misses it
+(Section~\ref{sec:interpretation}).
 
-Position your question with respect to them. Do not produce a list of
-summaries: each reference must earn its place by supporting, framing or
-contradicting something you do.
+Elsworth et al.~\cite{elsworth2025} measure the energy of AI serving at Google.
+Beside the active accelerators, they count the host machines, the idle capacity
+held in reserve and the data-centre overhead, which widen the energy of a median
+prompt 1.72-fold. Their paper is a preprint, not yet peer reviewed. This study
+makes the same argument for one batch job: the capacity it reserves, not the
+work it does, carries most of its footprint.
 
-Every reference must be verified by you, by hand. Any reference an AI
-proposed that turns out not to exist must be recorded in Appendix B. A
-reference that does not exist costs you this section.
+Lakim et al.~\cite{lakim2022} assess a language-model project end to end,
+small experiments included, and point to idle hardware as a reason to keep it
+fully used. Their count of experiments is why the payback of
+Section~\ref{sec:payback} includes the test runs, not only the AI assistance.
+Wadenstein and Vanderbauwhede~\cite{wadenstein2025} show that hardware
+manufacture dominates the life-cycle emissions of scientific computing centres
+once the grid decarbonises, which is why this study keeps a share of hardware
+production. Avgerinou et al.~\cite{avgerinou2017} find that the average PUE of
+EU data centres declined each year from 2009 to 2016, which is why this study
+takes a recent EU average~\cite{eudc2025} as a proxy for Aion.
 
-\emph{What is expected in v1, and what in v2.} The method for searching is
-taught in week 3, six weeks before v1 is due, so you have time to read a
-field. \textbf{In v1 this section is marked on three things: your references
-are there, every one is verified, and the section situates what you did
-against them}. Your reviewers will tell you what is missing, and
-\textbf{v2 is where that section earns its keep}.}
+None of these works separates, for one batch job, the energy of what it
+reserves from the energy of what it computes, or asks whether an AI-assisted
+change to that reservation repays its own cost.
 
 % ---------------------------------------------------------------------
-\section{Life Cycle Assessment}
-\guidance{The five subsections below follow Session 3 with respect to
-ISO 14040~\cite{iso14040} and ISO 14044~\cite{iso14044}. In each subsection,
-introduce its intention concisely, then apply it to your job.}
+\section{Life Cycle Assessment}\label{sec:lca}
+This section assesses the baseline job in the phases of ISO~14040 and
+14044~\cite{iso14040,iso14044}: goal and scope, inventory, impact assessment and
+interpretation, followed by the reporting of its hotspots.
 
 \subsection{Goal and scope definition}\label{sec:goalscope}
-The goal and scope definition fixes what is studied, the functional unit every
-later figure refers to, the boundary of the system and the method that turns
-inventory flows into an impact~\cite{iso14040,iso14044}.
+The goal and scope fix what is studied, the unit every figure refers to, the
+boundary of the system and the impact method.
 
-\emph{Goal.} This study quantifies the carbon footprint of one execution of a
-baseline 31-mer counting job. That footprint is the reference against which
-the AI-assisted optimisation of Section~\ref{sec:optimisation} and its carbon
-payback in Section~\ref{sec:payback} are measured.
+\emph{Goal.} This study quantifies the carbon footprint of one run of the
+baseline job. That footprint is the reference for the optimisation of
+Section~\ref{sec:optimisation} and its payback in Section~\ref{sec:payback}.
 
 \emph{The job.} The code is \texttt{kc-py1.py} from the public repository
 \texttt{lh3/kmer-cnt}~\cite{kmercnt}, frozen at commit
-\texttt{e2574719cfb7\allowbreak 84915d80eb58\allowbreak 28e78dfae4cf\allowbreak dd7b}.
-It is a single-threaded Python~3 program. It reads FASTA from standard input and
-counts every canonical 31-mer, the lexicographically smaller of a 31-mer and its
-reverse complement. It skips any 31-mer that contains \texttt{N}. It prints a
-histogram with 255 lines, one per count from 1 to 255, and pools every count
-above 255 into the last line. The input is
-\texttt{M\_abscessus\_HiSeq\_10M.fa.gz} from the repository's v0.1
-release~\cite{kmercnt}: 187\,693\,955~bytes, SHA-256
-\texttt{dd2ef49aebab\allowbreak fed1574b55fd\allowbreak 002025f29b2f\allowbreak da88c70b2095\allowbreak f5e1b3a822ce\allowbreak e736}.
-It is decompressed on the fly by \texttt{gzip}. The program upper-cases only the
-last record of its input. No sequence line of this input holds a lower-case
-base (checked on 28~September~2026), so this does not affect the result. The job
-is submitted with the Slurm script \texttt{run-baseline.sh} of the project
-repository at commit
-\texttt{253d93ec726b\allowbreak 82670c8f4b84\allowbreak da20e9528c9a\allowbreak 59ef}.
-Every run writes the same 1\,972-byte histogram, SHA-256
-\texttt{06a32de77200\allowbreak 121a397050e0\allowbreak 15a257953dc9\allowbreak 56b7854027a1\allowbreak ed73b15afc12\allowbreak bf42}.
+\texttt{e2574719}.\footnote{Full identifiers. Code: \texttt{lh3/kmer-cnt}
+commit \texttt{e2574719cfb7\allowbreak 84915d80eb58\allowbreak
+28e78dfae4cf\allowbreak dd7b}. Input SHA-256:
+\texttt{dd2ef49aebab\allowbreak fed1574b55fd\allowbreak
+002025f29b2f\allowbreak da88c70b2095\allowbreak f5e1b3a822ce\allowbreak e736}.
+Output SHA-256: \texttt{06a32de77200\allowbreak 121a397050e0\allowbreak
+15a257953dc9\allowbreak 56b7854027a1\allowbreak ed73b15afc12\allowbreak bf42}.
+Job script: project repository commit \texttt{253d93ec726b\allowbreak
+82670c8f4b84\allowbreak da20e9528c9a\allowbreak 59ef}.}
+It reads DNA reads from standard input in FASTA, a plain-text format for
+sequences. DNA has two strands, and a 31-mer on one strand appears on the other
+as its reverse complement. The program therefore counts each 31-mer under the
+alphabetically smaller of its two forms, called the canonical 31-mer, and skips
+every 31-mer that contains \texttt{N}, the letter for an unread base. It prints
+a histogram of 255 lines: line~$n$ gives the number of distinct canonical
+31-mers that occur $n$ times, and line~255 also holds those that occur more
+often. The input is a compressed file of 187\,693\,955~bytes from the
+repository's v0.1 release~\cite{kmercnt}. The program converts lower-case bases
+to upper case in the last read only, so a lower-case base elsewhere would change
+the count. No read of this input holds one (checked on 27~October~2026). Every
+run writes the same 1\,972-byte histogram. The footnote identifies the code,
+the input and the histogram, the last two by their SHA-256 checksums,
+fingerprints of their exact content.
 
-\emph{The machine.} The job runs on the Aion cluster of the University of
-Luxembourg HPC platform, partition \texttt{batch}, QoS \texttt{normal}, on the
-regular compute node \texttt{aion-0127}. An Aion node holds two AMD EPYC~7H12
-processors of 64~cores each, 256~GB of DDR4 memory, a 480~GB local SSD and one
-HDR100 InfiniBand port~\cite{ulhpcaion}. The loaded modules are
-\texttt{env/release/default} and \texttt{lang/Python/3.11.5-GCCcore-13.2.0}
-(Python~3.11.5), as recorded in every run's log.
+\emph{Repository.} The job, its optimised versions, the measurement records,
+the calculation scripts and the tool of Section~\ref{sec:generalises} are in
+the public repository \repourl, at commit \texttt{\repocommit}.
 
-\emph{The allocation.} Each run holds one node exclusively: one task,
-128~cores, all the memory Slurm can reserve on the node
-(\texttt{-{}-mem=0}, recorded as 224\,000~MiB) and a walltime limit of
-30~minutes. The program uses one of those cores. The node is reserved
-exclusively so that no other job shares it. As a consequence, the whole node,
-not one core, is attributed to the job.
+\emph{The machine.} The job runs in the \texttt{batch} partition of Aion, the
+queue for production jobs, at the \texttt{normal} quality-of-service level. A
+regular Aion node holds two AMD EPYC~7H12 processors of 64~cores each, 256~GB of
+memory, a 480~GB local solid-state disk (SSD) and one 100~Gb/s InfiniBand
+network port~\cite{ulhpcaion}. The software is Python~3.11.5 from the cluster's
+default release, as recorded in every run's log.
 
-\emph{The user.} The job is submitted with \texttt{sbatch} from an Aion login
-node by the author, through a standard student account.
+\emph{Assumption of equal nodes.} Slurm, the scheduler, places each run on
+whichever node is free, so the runs of this study fall on several regular
+nodes. The study assumes that every regular node of the partition gives the same
+performance and the same power draw for the same request. Under this
+assumption, runs on different nodes measure the same job. All these nodes are of
+one type, but the assumption is not proven: Section~\ref{sec:threats} weighs
+it.
 
-\emph{How many runs.} The functional unit is one run. Five runs are measured
-(Section~\ref{sec:lci}). The job is assumed to be executed 100~times per year,
-an assumption listed in Section~\ref{sec:threats}.
+\emph{Allocation and use.} Each baseline run holds one node exclusively:
+128~cores, all the memory Slurm can reserve (224\,000~MiB, where 1~MiB is
+$2^{20}$~bytes) and a 30-minute limit. Its program uses one of those cores. The
+author submits it from a login node, with a standard student account. Five runs
+are measured, and the job is assumed to run 100~times per year
+(Section~\ref{sec:threats}).
 
-\emph{Functional unit.} The GWP100 carbon footprint of one execution of
-\texttt{kc-py1.py} at commit \texttt{e2574719} of \texttt{lh3/kmer-cnt},
-counting exact canonical 31-mers in \texttt{M\_abscessus\_HiSeq\_10M.fa.gz}
-(187\,693\,955~bytes, SHA-256 \texttt{dd2ef49a\ldots e736}), submitted by a
-student user on Aion, partition \texttt{batch}, holding one exclusive regular
-node (2~$\times$~AMD EPYC~7H12, 128~cores, 224\,000~MiB reservable memory) for
-a median walltime of 368~s.
+\emph{Functional unit.} One run of \texttt{kc-py1.py} at commit
+\texttt{e2574719} that counts the exact canonical 31-mers of the fixed input and
+writes the reference histogram, submitted by a student user to partition
+\texttt{batch} of Aion and executed on one regular node. Its impact is reported
+in gCO\textsubscript{2}e at GWP100. The allocation is deliberately not part of
+the unit, so that a change of allocation (Section~\ref{sec:optimisation}) is
+compared on the same unit.
 
-\emph{Method.} One criterion: a carbon footprint in CO\textsubscript{2}e.
-The characterisation method is IPCC~2021~\cite{ipcc2021} and the indicator is
-GWP100.
+\emph{Method.} One impact category, climate change, characterised with the
+IPCC~2021 method of the Intergovernmental Panel on Climate
+Change~\cite{ipcc2021}, as GWP100.
 
-\emph{Boundary.} Inside the boundary are the node the job holds for its
-walltime, and the share of the interconnect, the storage and the site that
-serve it. The last three enter through the power usage effectiveness (PUE)
-declared in Section~\ref{sec:lci}. Outside the boundary are the author's laptop,
-the login node, the network between laptop and cluster, the one-off download of
-the input, the development of the code, and every node and job the allocation
-does not reserve.
-
-\emph{Life cycle phases.} For the compute node, the study keeps production,
-including the extraction of raw materials that cradle-to-gate data contain, and
-use. For the interconnect, the storage and the site, it keeps use only, through
-the declared PUE. End of life is not inventoried separately: the disposal route
-of Aion's hardware is not published. One of the candidate hardware datasets
-of Section~\ref{sec:lci} nonetheless includes disposal. That mismatch is listed
-in Section~\ref{sec:threats}.
-
-\emph{Components.} The study is capped at four components, which
-Section~\ref{sec:lci} inventories in this order:
-(1)~the \emph{compute node}: its electricity during the walltime and a share of
-its manufacture;
-(2)~the \emph{interconnect}: the HDR100 InfiniBand fabric that carries the
-job's reads and writes between the node and shared storage;
-(3)~the \emph{storage}: the shared GPFS file system that holds the input, the
-code and the output;
-(4)~the \emph{site}: cooling and power distribution around the machine.
+\emph{Boundary.} Four components are inside the boundary:
+(1)~the \emph{compute node}, with its electricity during the walltime and a
+share of its manufacture;
+(2)~the \emph{interconnect}, the InfiniBand network that carries the job's
+reads and writes;
+(3)~the \emph{storage}, the shared General Parallel File System (GPFS) that
+holds the input, the code and the output;
+(4)~the \emph{site}, the cooling and power distribution around the machine,
+which enters through the PUE.
+Outside are the author's laptop, the login node, the network to the cluster,
+the download of the input, the development of the code and every node the
+allocation does not reserve. For the node, production and use are kept; for the
+other three components, use only. End of life is not inventoried, because the
+disposal route of Aion's hardware is not published.
 
 \subsection{Life cycle inventory}\label{sec:lci}
-The inventory lists the physical flows the assessment runs on, and how each
-was obtained. It holds no grams: those belong to Section~\ref{sec:lcia}. Every
-entry is gathered in Table~\ref{tab:inventory} in Appendix~A, with its source
-and the date it was read. The raw scheduler records, logs and commands are kept
-in the project repository.
+The inventory lists the physical flows the assessment rests on and how each is
+obtained. Table~\ref{tab:inventory} in Appendix~A gives every entry with its
+source and its reading date.
 
-\emph{The measurement.} The frozen commit and input of
-Section~\ref{sec:goalscope} were run five times as separate batch jobs on
-29~September~2026, submitted consecutively with
-\texttt{-{}-dependency=singleton} so that no two overlapped. Each run held its
-node exclusively, and all five landed on \texttt{aion-0127}. All five completed
-with exit code~0 and wrote identical output. All five are kept and the median
-is reported. Walltimes were 362, 364, 368, 369 and 372~s: a median of 368~s and
-a spread of 10~s from fastest to slowest. File system caches were neither reset
-nor measured. The first run is not the slowest (the third is), so these runs
-show no first-run effect, but they do not establish whether any run started
-cold. The records were read with \texttt{sacct} on 29~September~2026. The
-fields read, and why each is the quantity claimed, are:
-\texttt{Elapsed}, the time from start to end of the allocation, which is the
-walltime the node is held;
-\texttt{AllocNodes} and \texttt{AllocCPUS}, the node and cores held;
-\texttt{ReqMem}, the memory reserved;
-\texttt{MaxRSS} of the Python step, the peak resident memory the program
-touched, which agrees with the maximum resident set size that
-\texttt{/usr/bin/time -v} reports to within 0.2\,\%;
-\texttt{MaxDiskRead} and \texttt{MaxDiskWrite} of the batch and Python steps;
-and \texttt{ConsumedEnergy} and \texttt{ConsumedEnergyRaw}.
+\emph{Time and resources.} The job runs five times on 29~September~2026, one
+run after another on the same node. All five end without error and write the
+same histogram. Their walltimes span 362 to 372~s, with a median of 368~s. The
+scheduler's accounting records give the cores held, the memory reserved and the
+peak memory the program uses.
 
-\emph{Whether an energy figure comes back.} It does not come back from the
-scheduler. On 29~September~2026, \texttt{scontrol show config} reported the
-energy plugin \texttt{acct\_gather\_energy/rapl}. Nevertheless, both energy fields
-were empty for every step of all five jobs, and for a separate interactive
-allocation checked the same day. The empty fields are missing data, not zero
-energy. The processor's own RAPL counters are readable by an ordinary user
-through \texttt{/sys/class/powercap}, while \texttt{perf} reports its package
-energy event as not supported. The job was therefore run five more times on
-29~September~2026, with the same program, input and allocation. Each run read
-both package counters directly before and after the Python step, and corrected
-for counter wrap. \texttt{aion-0127} was busy, so these five runs and an idle
-reading were moved to \texttt{aion-0144}, an identical regular node. All five
-completed with exit code~0 and wrote the same histogram, and Slurm's energy
-fields stayed empty. Over Python steps of 357.6 to 366.4~s, the two CPU packages
-drew a median of 67\,834~J (range 67\,129 to 68\,827~J), an average of 188~W.
-Read the same way for 60~s after the fifth run, the idle node drew 10\,959~J, or
-183~W. Assuming that idle rate held throughout each run, the job's activity
-adds a median of only 1\,863~J (range 1\,690 to 1\,953~J). So 97\,\% of the
-package energy is drawn by a node the job holds but barely uses. RAPL covers
-the processor packages only: memory, board, local disk, fans and network card
-are outside it, and so is the time the allocation runs outside the Python step.
-Because no instrument reaches the whole node, the node's electricity is also
-estimated with the Green Algorithms model~\cite{lannelongue2021}:
-the walltime times the power of the cores and memory held, using 280~W per
-64-core processor~\cite{ulhpcaion} and 0.3725~W per GB of memory. The whole
-256~GB installed is counted, because the exclusive allocation holds all of it.
-Counting one active core gives 36.7~kJ (0.0102~kWh) per run. Counting all
-128~allocated cores at full power gives 241~kJ (0.0670~kWh). The measured
-package energy alone, 67.8~kJ, is almost twice the first figure. So the one-core
-model understates the node, and both model figures are scenarios, not bounds.
-The measured package energy is the figure this inventory carries forward.
+\emph{Energy.} The scheduler's energy fields are empty for every run, which is
+missing data, not zero energy. The processors (CPUs), however, carry energy
+counters, called Running Average Power Limit (RAPL), that an ordinary user can
+read. Five more runs on the same day read them before and after the counting
+step, on a second regular node because the first is busy. The two processor
+packages draw a median of 67\,834~J per run (range 67\,129 to 68\,827~J), or
+188~W on average. Read for 60~s after the fifth run, the idle node draws 183~W.
+The program's own activity therefore adds only 1\,863~J per run (median): 97\,\%
+of the package energy is drawn whether the program runs or not. RAPL covers the
+processor packages only; memory, board, disk and network card fall outside it.
 
-\emph{Allocation rule.} Anything shared across many runs is divided down to one
-run by the node-seconds the job holds over the node-seconds the hardware
-delivers during its service life. For one exclusive node this is the walltime
-over the service life. The same rule is applied in every subsection below.
+\emph{Models.} The Green Algorithms model~\cite{lannelongue2021} gives a second
+estimate: the walltime times the power of the cores and memory held, with
+280~W per 64-core processor at its rated power~\cite{ulhpcaion} and 0.3725~W per
+GB of memory. Counting one core gives 36.7~kJ per run; counting all 128~cores at
+rated power gives 241~kJ. The measured packages alone, 67.8~kJ, draw almost
+twice the one-core figure, so both model figures serve as scenarios, not as
+bounds.
 
-\subsubsection{Compute node}
-Operational: 67\,834~J of CPU-package electricity per run (median, RAPL), of
-which 1\,863~J is above idle, over a median walltime of 368~s,
-holding 1~node and 128~cores. Memory reserved: 224\,000~MiB (\texttt{ReqMem}),
-of the 256~GB installed~\cite{ulhpcaion}. Memory touched: 7\,760\,436~KiB, or
-7.40~GiB (median \texttt{MaxRSS}). The job therefore touches 3.4\,\% of what it
-reserves, and 211~GiB stays reserved but unused.
-Embodied: ecoinvent cut-off v3.11~\cite{ecoinvent311} holds no server
-production activity. Searches on 29~September~2026 for \emph{server} (58
-activities, 32 products), \emph{computer production}, \emph{computer, desktop}
-and \emph{computer, laptop} found none. The closest dataset is
-\emph{computer production, desktop, without screen} (GLO, 1998--2024,
-per unit). It models a 2002 single-processor desktop of 11.3~kg and includes
-packaging and disposal. Under IPCC~2021 GWP100 it carries 221~kg
-CO\textsubscript{2}e per unit. A two-socket AMD EPYC server, the Dell PowerEdge R7525, has a published production footprint of
-1\,768.4~kg CO\textsubscript{2}e, of which 854.7~kg comes from two 4~TB
-SSDs~\cite{dellr7525}. That study uses IPCC~2013 rather than IPCC~2021, and its
-server differs from an Aion blade. Neither figure describes an Aion node. Which
-one enters Section~\ref{sec:lcia}, and why, is decided there. Aion entered
-production in October--November 2021 and still runs in September
-2026~\cite{ulhpcaion}. No retirement date is published, so a service life of
-six years is assumed (Section~\ref{sec:threats}). One run then holds 368~s of
-189\,345\,600~node-seconds, a share of $1.94\times10^{-6}$ of the node.
+\emph{Compute node.} The job reserves 224\,000~MiB and touches 7.40~GiB of it,
+3.4\,\%. For manufacture, the ecoinvent~3.11 database~\cite{ecoinvent311} holds
+no server dataset (searched on 29~September~2026). Its closest dataset, a 2002
+desktop computer without screen, carries 221~kgCO\textsubscript{2}e. A two-socket
+AMD EPYC server, the Dell PowerEdge R7525, has a published production footprint
+of 1\,768.4~kgCO\textsubscript{2}e, of which 854.7~kg comes from two 4~TB
+SSDs~\cite{dellr7525}. Neither describes an Aion node; Section~\ref{sec:lcia}
+chooses between them. Aion has run since late 2021 and has no published
+retirement date~\cite{ulhpcaion}, so a six-year service life is assumed. A
+shared item is divided by the node-seconds a run holds over the node-seconds the
+node delivers in its life: 368~s of 189\,345\,600~s, a share of
+$1.94\times10^{-6}$.
 
-\subsubsection{Interconnect}
-The job runs on one node, so no node-to-node traffic occurs. Its only traffic
-on the HDR100 fabric (link rate~100, read with \texttt{ibstat}) is file system
-I/O. The step counters do not measure storage traffic directly. The Python
-step's \texttt{MaxDiskRead} of 680.67~MiB equals the decompressed stream that
-\texttt{gzip} writes into the pipe (713\,674\,148~bytes, or 680.61~MiB). The
-batch step's \texttt{MaxDiskWrite} of 680.72~MiB is \texttt{gzip} writing that
-same pipe. What the batch step reads beyond the pipe, about 198~MiB, is the
-179~MiB compressed input plus about 19~MiB of other files, most likely the
-loaded modules. The data read from storage per run is therefore about
-187\,693\,955~bytes plus about 19~MiB, and the data written is the
-1\,972-byte histogram plus the job log. This breakdown is inferred from the
-counters, not measured on the fabric. Runs~2 to~5 may have read the input from
-the node's page cache. The fabric's energy is not metered per job. It enters
-through the declared PUE of the site subsection.
+\emph{Interconnect and storage.} The job runs on one node, so its only network
+traffic is file input and output. It reads about 188~MB of compressed input and
+19~MiB of software, and writes the 1\,972-byte histogram, as inferred from the
+scheduler's disk counters. Neither the network nor the file system meters its
+energy per job, so both are left out of the result.
 
-\subsubsection{Storage}
-The repository, input and output sit on Aion's shared GPFS file system
-(\texttt{df -T}, 29~September~2026)~\cite{ulhpcaion}. Per run, the job keeps
-the 187\,693\,955-byte input and writes the 1\,972-byte output, reading and
-writing the bytes listed under the interconnect. Storage energy is not metered
-per job. It enters through the declared PUE of the site subsection.
-
-\subsubsection{Site}
-The University of Luxembourg HPC centre publishes no PUE for Aion. This study
-therefore declares 1.36, the EU average PUE for 2023, reported in 2024 and
-published in the European Commission's first technical report on data-centre
-energy performance~\cite{eudc2025}, read on 29~September~2026. It is a regional proxy,
-not a measurement of this site. It multiplies the operational energy of the
-compute node, and covers cooling, power distribution, interconnect and storage.
-How far a different value would move the result is discussed in
-Section~\ref{sec:threats}.
+\emph{Site.} The PUE is the ratio of the electricity a whole data centre draws
+to the electricity its computing equipment draws. The centre publishes none for
+Aion, so the study declares 1.36, the energy-weighted average of 681 EU data centres for
+2023~\cite{eudc2025}, read on 29~September~2026. This PUE adds cooling and power
+distribution to the counted node energy. It cannot supply the computing energy
+of the network and storage that is left out.
 
 \subsection{Life cycle impact assessment}\label{sec:lcia}
-The impact assessment multiplies each inventory flow by a characterisation
-factor, an impact per unit of flow, chosen, cited and motivated. This study
-assesses one impact category, climate change. It is a single-criterion
-carbon footprint in CO\textsubscript{2}e. It leaves out water use, mineral
-resource use and every other category of the Environmental Footprint method.
-The characterisation method is IPCC~2021~\cite{ipcc2021}, and every factor below
-is read as GWP100. The chain from joules to grams is gathered in
-Table~\ref{tab:chain} in Appendix~A. Every value in it is recomputed from the
-raw records by the script \texttt{lcia-calculation.py} of the project
-repository.
+The impact assessment multiplies each flow by a characterisation factor, an
+impact per unit of flow. Table~\ref{tab:chain} in Appendix~A gives the chain,
+which a script of the project repository recomputes from the raw records.
 
-\emph{The energy boundary.} The measured CPU-package energy of
-Section~\ref{sec:lci}, 67\,834~J, covers the two processor packages during the
-Python step only. The job, however, holds the whole node for its walltime.
-This study therefore builds a node estimate from three terms, each taken per
-run from the five \texttt{aion-0144} runs and paired with those runs' own
-timing:
-(1)~the measured package energy over the Python step;
-(2)~the idle package rate, 182.6~W, over the rest of the allocation, the gap
-between Slurm's \texttt{Elapsed} and the Python step (1 to 3~s per run, 0.2 to
-0.6~kJ);
-(3)~the memory, modelled with the Green Algorithms coefficient of
-0.3725~W/GB~\cite{lannelongue2021} for the 256~GB installed, 95.4~W, over
-\texttt{Elapsed}.
-The median node estimate is 103\,146~J (range 101\,622 to 104\,215~J), or
-0.0287~kWh, over a median \texttt{Elapsed} of 364~s. It is still partial. The
-board, the local SSD, the network card and power conversion are outside it, and
-Section~\ref{sec:threats} gives their likely size. The functional unit's 368~s
-comes from the \texttt{aion-0127} series, which carries no energy reading. The
-energy chain uses the 364~s of the \texttt{aion-0144} runs instead, so that
-energy and time come from the same runs. The two medians differ by 1.1\,\%.
+\emph{Node energy.} The measured packages cover the counting step only, while
+the job holds the whole node for its walltime. The node estimate therefore adds
+three terms per run: the measured package energy; the idle rate over the 1 to
+3~s of the allocation outside the counting step; and the memory model,
+0.3725~W/GB for all 256~GB, or 95.4~W, over the walltime. Its median is
+103\,146~J (0.0287~kWh, range 101\,622 to 104\,215~J) over 364~s, the median
+walltime of the same runs.
 
-\emph{Site.} The declared PUE of 1.36~\cite{eudc2025} (Section~\ref{sec:lci})
-multiplies the node estimate: $0.0287~\text{kWh}\times1.36=0.0390$~kWh drawn
-by the site per run.
+\emph{Site and grid.} The PUE of 1.36 raises this to 0.0390~kWh drawn by the
+site. The grid factor is 337~gCO\textsubscript{2}e/kWh: ecoinvent~3.11, market
+for electricity, low voltage, Luxembourg, 2020--2024, IPCC~2021
+GWP100~\cite{ecoinventlu}, read on 19~October~2026. It describes the
+electricity consumed in Luxembourg, imports and grid losses included, which is
+the electricity the site draws. A factor for national generation alone would
+leave out the imports. The operational impact is
+$0.0390\times337=13.1$~gCO\textsubscript{2}e per run.
 
-\emph{Grid factor.} Aion is in Luxembourg. The factor is ecoinvent~3.11 cut-off,
-\emph{market for electricity, low voltage}, LU, time period 2020--2024, IPCC~2021
-climate change total excluding biogenic CO\textsubscript{2},
-GWP100~\cite{ecoinventlu}: 337~gCO\textsubscript{2}e/kWh, read on 19~October
-2026. It describes the electricity consumed in Luxembourg, imports and grid
-losses included, which is the electricity the site draws. A factor that
-counts only generation on national territory would leave out the imports.
-Operational impact: $0.0390~\text{kWh}\times337~\text{g/kWh}=13.1$~gCO\textsubscript{2}e
-per run.
-
-\emph{Hardware production.} Section~\ref{sec:lci} holds two proxies. This study
-uses the Dell PowerEdge R7525~\cite{dellr7525}, a two-socket AMD EPYC
-server, because the ecoinvent desktop dataset models a 2002 single-processor
-machine of 11.3~kg. The R7525 figure is 1\,768.4~kg CO\textsubscript{2}e, of
-which 854.7~kg comes from two 4~TB SSDs. An Aion node holds one 480~GB SSD, so
-the two SSDs are removed, which leaves 913.7~kg. The Dell study characterises
-with IPCC~2013, not IPCC~2021, and publishes no inventory per gas, so the figure
-cannot be recharacterised. For CO\textsubscript{2} the two methods agree, with a
-GWP100 of~1 by definition. Between them, the GWP100 of fossil methane moves from
-28 to 29.8 and that of N\textsubscript{2}O from 265 to
-273~\cite{myhre2013,ipcc2021}, which are changes of 6\,\% and 3\,\%. A change of
-that order on the hardware term moves the total by less than 1\,\%. The figure
-is therefore kept and labelled IPCC~2013 in Table~\ref{tab:chain}. The grid
-factor is not applied to it, because the hardware is made worldwide. With the
-allocation rule of Section~\ref{sec:lci} and the 364~s of the paired series, one
-run holds $364/189\,345\,600=1.92\times10^{-6}$ of a six-year life, so
-$913.7~\text{kg}\times1.92\times10^{-6}=1.76$~gCO\textsubscript{2}e per run.
+\emph{Hardware.} The study uses the R7525 figure, because the ecoinvent desktop
+models a single-processor machine of 11.3~kg from 2002. An Aion node holds one
+480~GB SSD, not two 4~TB SSDs, so those are removed. This leaves
+913.7~kgCO\textsubscript{2}e, a proxy for a node, not its footprint. The Dell
+study uses IPCC~2013 and publishes no emissions per gas, so the figure cannot
+be converted to IPCC~2021: it is kept and labelled (Section~\ref{sec:threats}).
+The grid factor is not applied to it, because the hardware is made worldwide.
+One run holds $364/189\,345\,600=1.92\times10^{-6}$ of a six-year life, so it
+carries 1.76~gCO\textsubscript{2}e.
 
 \emph{Result.} One run of the baseline job emits
-$13.1+1.8\approx15$~gCO\textsubscript{2}e, to two significant figures.
+$13.1+1.8\approx15$~gCO\textsubscript{2}e.
 
 \subsection{Interpretation}\label{sec:interpretation}
-The figure of 15~gCO\textsubscript{2}e is the GWP100 footprint of one run of
-the frozen job holding one exclusive Aion node for 364~s. It counts the
-measured CPU packages, a modelled memory, the site through a proxy PUE, and a
-time share of a proxy server's production.
-
-\emph{Against daily life.} A 5~W LED bulb lit for one hour draws 5~Wh, or
-1.7~gCO\textsubscript{2}e on the same Luxembourg factor. One run therefore
-equals about 9~hours of that bulb. It also equals about 50~m in a small petrol
-car, at 291~gCO\textsubscript{2}e per km~\cite{ries2026s2}. That figure is
-cradle to grave and includes the road, so it has a wider boundary than the
-footprint of one run. At the assumed 100~runs per year, the job emits
+\emph{Against daily life.} A 5~W LED bulb lit for one hour emits
+1.7~gCO\textsubscript{2}e on the same grid factor, so one run equals about
+9~hours of light. It also equals about 50~m in a small petrol car, at
+291~gCO\textsubscript{2}e per km~\cite{ries2026s2}, a cradle-to-grave figure
+with a wider boundary. At 100~runs per year, the job emits
 1.5~kgCO\textsubscript{2}e per year.
 
-\emph{Against the alternative scenarios.} Table~\ref{tab:scenarios} in
-Appendix~A puts the chosen estimate next to the energy scenarios of
-Section~\ref{sec:lci}, all on the 364~s of the paired series. The Green
-Algorithms figures of Section~\ref{sec:lci}, 36.7 and 241~kJ, used the 368~s of
-\texttt{aion-0127}, so they are 1.1\,\% higher than the 36.3 and 238.6~kJ shown
-here. Each gap has one cause.
-The package energy alone, 67.8~kJ, lacks the memory term (34.7~kJ) and, for
-the median run, the 0.6~kJ outside the Python step. It is 34\,\% below the chosen figure.
-The one-core model, 36.3~kJ, counts 4.4~W of processor power where the
-packages measure 188~W, because it gives the 127 unused cores no power at all.
-That accounts for its entire 66.8~kJ gap, since the memory term is the same in
-both. The all-cores model, 238.6~kJ, counts 560~W of processor power, the
-rated maximum of both packages. That is 135~kJ more than the chosen figure.
-The package energy above idle, 1.9~kJ, is the work the program itself adds. It
-is less than 2\,\% of the chosen figure.
-
-\emph{Which check this is.} The all-cores model is a top-down estimate: the node
-held, times its rated processor power, times the walltime. Next to a counter
-reading, it tests the reading. The measured 188~W is 34\,\% of the rated
-560~W. That ratio is plausible for a node on which one core of 128 works, so
-the check supports the reading and does not contradict it. The one-core model is
-a substitute. Next to the reading, the substitute is the figure under test:
-used on an exclusive node, it understates the processor power 43-fold
-(4.4 against 188~W) and the node estimate almost threefold. The chosen result keeps the reading, and uses a model only for the
-memory, which no counter reaches.
+\emph{Against the scenarios.} Table~\ref{tab:scenarios} in Appendix~A sets the
+chosen estimate beside the alternatives, all on the same 364~s. The measured
+packages alone fall 34\,\% short, because they lack the memory. The one-core
+model falls almost threefold short. It gives the processors 4.4~W where they
+measure 188~W, because it gives the 127 unused cores no power. The all-cores
+model, at the rated 560~W, overshoots by 135~kJ. The measured 188~W is 34\,\% of
+that rating, a plausible share for a node on which one core of 128 works. The
+program's own work above idle, 1.9~kJ, is less than 2\,\% of the node estimate.
+A user who counts only the cores a program uses therefore understates the
+footprint of an exclusive job, which is why the chosen result keeps the
+measurement wherever one exists.
 
 \subsection{Reporting}\label{sec:reporting}
-The baseline is 15~gCO\textsubscript{2}e per run: 13.1~g of electricity and
-1.8~g of hardware production. The functional unit is one run of
-\texttt{kc-py1.py} on the fixed input, holding one exclusive regular Aion node
-on partition \texttt{batch} for 364~s. The conventions are IPCC~2021 GWP100,
-CPU packages measured with RAPL over the Python step, memory modelled at
-0.3725~W/GB, a PUE of 1.36, a grid factor of 337~gCO\textsubscript{2}e/kWh and
-a six-year hardware life. Across the node scenarios of
-Table~\ref{tab:scenarios}, the total ranges from 6.4 to 32~gCO\textsubscript{2}e. A reader who reuses the
-figure should scale it with the node-time held, not with the CPU work done.
+The baseline footprint is 15~gCO\textsubscript{2}e per run: 13.1~g of
+electricity and 1.8~g of hardware production, for one run that holds an
+exclusive Aion node for 364~s. It rests on IPCC~2021 GWP100, measured processor
+energy, modelled memory, a PUE of 1.36, 337~gCO\textsubscript{2}e/kWh and a
+six-year hardware life. Across the scenarios of Table~\ref{tab:scenarios}, it
+ranges from 6.4 to 32~g. It scales with the node-time held, not with the work
+done.
 
-Two hotspots carry the result, and both come from the allocation shape rather
-than from the counting. The first is the idle draw of the CPU packages of the
-exclusive node: 8.5~gCO\textsubscript{2}e, or 57\,\% of the total with its share
-of the site overhead. The program's own work above idle takes 1.6\,\%. The
-second is the reserved memory: 4.4~gCO\textsubscript{2}e, or 30\,\%. The job touches
-3.4\,\% of that memory. The remaining 12\,\% is hardware production.
-Section~\ref{sec:optimisation} attacks these two hotspots: one 128-core node,
-held whole, for a program that uses one core and 7.4~GiB.
+Two hotspots carry the result, and both come from the allocation rather than
+from the counting. The idle draw of the processors takes 8.5~g, 57\,\% of the
+total with its share of the site overhead, while the program's own work takes
+1.6\,\%. The reserved memory takes 4.4~g, 30\,\%, and the job touches 3.4\,\% of
+it. Hardware production takes the remaining 12\,\%.
 
 % ---------------------------------------------------------------------
 \section{Optimisation}\label{sec:optimisation}
 
 \subsection{Optimisation procedure}\label{sec:optproc}
-\guidance{Start from the hotspot you named in
-Section~\ref{sec:reporting}. Say how you propose to remove it \emph{in your
-job}: what you change, and why that attacks that hotspot rather than something
-else. Reserved memory nobody uses, a serial phase that holds every node idle, a
-file rewritten at every iteration and an allocation larger than the code can
-fill are the usual four.
+The hotspots come from what the job holds, not from what it computes. The
+optimisation therefore changes what surrounds the program and leaves the
+program itself unchanged, byte for byte, so that the functional unit holds by
+construction. It uses two levers, in this order.
+(1)~\emph{Allocation.} Request only the cores and memory the program uses, on a
+node shared with other jobs. The job is then charged its share of the node's
+idle draw, memory and production, not all of it.
+(2)~\emph{Execution.} Run the same source faster, by compiling it with Cython,
+a compiler that turns Python code into C, so that the request is held for less
+time. This lever comes second, because the program's own work is only 1.6\,\% of
+the baseline.
 
-Then the mechanics: the commit you start from, the input you hold fixed, and
-the partition and allocation shape you run on. \textbf{Before you change
-anything, measure that starting point with the protocol of
-Section~\ref{sec:lci} and convert it with the factors of
-Section~\ref{sec:lcia}}: that pair, the quantities and the grams that follow
-from them, is your before.
-Then say which optimisations the AI coding agent applied, what you asked for
-and what you accepted, because you are the author of both.}
+Before and after keep the program, the input, the partition, the node type,
+the protocol (five consecutive runs, median) and the factors. They run on
+different nodes, so the comparison rests on the assumption of equal nodes of
+Section~\ref{sec:goalscope}.
 
-\subsection{Implementation}
-\guidance{What actually changed in the code or in the job script, concretely
-enough that a reader could make the same changes. Anything the agent proposed
-and you rejected belongs here too, with why. \textbf{Say how you checked that
-the job still produces the same result}: an optimisation that changes the output
-is a different job, and its numbers are no longer comparable.}
+An AI coding agent makes each change: OpenCode, with the DeepSeek V4 Flash model
+the course provides. The author chooses each lever, writes the agent's
+instructions, which forbid any change to the program, and checks every change.
+The agent's configuration fixes the model, a low reasoning effort, a limit on
+steps and the commands it may run. With a short project instruction file, it
+cuts the fixed cost of one request from 12\,365 to 5\,920 input tokens.
+
+\subsection{Implementation}\label{sec:implementation}
+\emph{Allocation.} The new job script requests one task with 6~cores, 10~GiB of
+memory, no exclusive node and a 10-minute limit. The memory is 1.25 times the
+measured 7.40~GiB peak, rounded up. Aion grants at most 1\,750~MB of memory per
+core (read on 27~October~2026), so 10~GiB needs 6~cores, and the program still
+runs on one of them. This rule comes from a failed attempt: a request of one
+core and 8~GB made the scheduler raise the cores silently, and the job then
+failed to start.
+
+\emph{Compilation.} A short build job compiles the unchanged source with
+Cython~3.0.10 into a standalone program, against the Python of the same
+software release. The build log records the checksum of the compiled source,
+which proves it is the frozen file. Without type annotations, Cython removes
+only the cost of interpreting Python, so a modest gain is expected. The
+compiled program runs with the same request.
+
+\emph{Rejected.} An earlier attempt by the agent, outside this scope, rewrites
+the counter around 62-bit integers. A rewrite changes the program, so
+it is discarded and left out of the payback (Section~\ref{sec:threats}).
+
+\emph{Check.} Both versions write the frozen counter's histogram on a sample of
+100\,000 reads, and every measured run writes the reference histogram on the
+full input. The program, its output and the functional unit are unchanged.
 
 \subsection{Footprint after optimisation}\label{sec:afteropt}
-\guidance{Go through Sections~\ref{sec:lci} to~\ref{sec:reporting} again, this
-time on the optimised job, and measure it the same way you measured the
-original. Run it on the same partition and the same node type, with the same
-fixed input, and keep exactly the same functional unit as in
-Section~\ref{sec:goalscope}. Those rules are what make the before and the after
-comparable: a different node type changes the energy per core-second, and your
-saving with it.
+Each version runs five times on 10~November~2026, alternating, on regular nodes
+shared with other jobs. Each run holds 6~cores and 10~GiB and peaks at 7.40~GiB,
+as before. The right-sized script takes a median of 367~s (362 to 377~s),
+against 364~s on the exclusive node: sharing the node does not slow the
+program. The compiled program takes 340~s (335 to 351~s), 7.4\,\% less.
 
-Then report only what the optimisation changed: the quantities that moved, the
-new impact figures that follow from them, what the new result means, and the
-hotspots if they are no longer in the same order. If something did not change,
-say so in one line. Finish by saying what you changed to produce the
-difference.}
+On a shared node, the processor counters see every job, so this job's energy is
+attributed rather than measured. Each run is charged 6/128 of the node's idle
+draw, the program's own work at 5.2~W per busy core from the baseline
+measurement, and the memory model on the 10.74~GB reserved. Production is shared
+by the larger of the core and memory shares. Applied to the whole node, the same
+chain returns the baseline within 0.1\,\%.
 
-\subsection{What generalises}
-\guidance{This is the part of your work that outlives your job. It
-is two things, in this order.
+The right-sized script is attributed 0.91~gCO\textsubscript{2}e per run, and
+the compiled program 0.84~g (range 0.83 to 0.87~g), which is kept. An optimised
+run thus carries 6\,\% of the baseline, an estimated saving of 14.0~g per run.
+This is a smaller footprint charged to the job, under the assumption that other
+jobs use what it frees, not a measured fall in the cluster's emissions. The node
+energy charged to a run falls from 103.1 to 6.0~kJ. The idle share still leads,
+with 44\,\% of the new total, ahead of the program's own work (27\,\%), memory
+(20\,\%) and production (9\,\%). Table~\ref{tab:afteropt} in Appendix~A sets
+the three versions side by side. Of the 14.04~g saved, the allocation brings
+13.98~g and compilation 0.07~g.
 
-\textbf{1. The method.} You have just fixed one hotspot in one job. Now
-write that fix as a procedure for \emph{any} job. Ordinary prose is fine,
-but give it a shape: how a reader recognises the same problem in their own
-job, what they should change, and how they check that it worked. Somebody
-holding different code must be able to follow it without ever seeing
-yours. If a step only makes sense for your job, it belongs in
-Section~\ref{sec:optproc}.
+\subsection{What generalises}\label{sec:generalises}
+\emph{1.~The method.} Any batch job can be checked in three steps.
+(1)~\emph{Recognise.} Compare what the job holds with what it uses, from the
+scheduler's records: the cores held against the CPU time over the walltime, and
+the memory reserved against the peak memory. A ratio far below one is the
+hotspot of this paper.
+(2)~\emph{Change.} Request one task with the cores the program keeps busy and
+1.25 times its peak memory. Raise the cores if the cluster limits the memory per
+core, so that the scheduler does not raise them silently. Drop exclusive access.
+Only then shorten the walltime without touching the program, for example by
+compiling it, and check that the gain repays the extra work.
+(3)~\emph{Check.} The output must be byte-identical, the job must complete
+within its new limits over five runs, and the footprint per run, with the same
+factors, must fall.
+The method does not help where a job already keeps its cores busy, where a
+cluster grants only whole nodes, or where the freed resources stay idle.
 
-\textbf{2. The tool.} A script, built with AI assistance, that carries out
-that method. It must run on a job it has never seen, given nothing but its
-identifier. Give the repository
-URL and the commit hash, and show that it reproduces the figure you
-reported. \textbf{Your script sits with a \texttt{README} of its own}: what it
-does, how to run it, and what it prints. The repository you cloned this
-template into already carries a \texttt{README} about building the paper, and
-that one answers a different question. Your reviewer receives it as an archive
-and runs it on a machine that has never seen your project, and possibly with no
-cluster at all, so say what it needs and give it something to read when the
-job record is out of reach.
-
-The method to write up is the one you actually worked out on your own
-job: that is the one you can defend, and the one that will still be
-true in January.}
+\emph{2.~The tool.} \texttt{allocation-footprint.py}, written by a second
+agent, applies the method to any finished job. From a job identifier on a
+cluster, or from a saved accounting record anywhere else, it prints what the job
+held and used, the footprint per run of that allocation and of the right-sized
+one, and the request lines to use. Every factor is an option, with this study's
+values as defaults. It needs Python~3.6 or newer and no other package, and it
+sits in \texttt{job/tool/} of the repository named in
+Section~\ref{sec:goalscope}, with its own README.
+It passes three checks. First, its inputs and outputs are those just listed.
+Second, it runs on jobs other than the one it is written for. It reproduces
+14.88~g on a baseline record and 0.92 and 0.84~g on optimised runs, and on an
+unrelated 61-s measurement job it reports 2.45~g for 0.7~CPU-seconds and
+recommends one core and 1~GiB. Third, it stops with a clear message on a record
+that lacks the allocation fields and on a job that does not complete. On the
+optimised job, it recommends the request already in use: nothing is left to
+cut.
 
 % ---------------------------------------------------------------------
 \section{Carbon Payback}\label{sec:payback}
-\guidance{Divide the full carbon cost of producing your optimisation by the
-saving per run you measured in Section~\ref{sec:afteropt}. Give the result in
-runs, then in a period, using how often the job is really submitted.
+The payback divides the cost of producing the optimisation by the saving per
+run. Only the path that leads to the kept optimisation is counted;
+Section~\ref{sec:threats} gives the weight of the discarded rewrite.
+Table~\ref{tab:payback} in Appendix~A details both terms.
 
-\textbf{The numerator is the cost of producing the optimisation}, and
-Appendix~B already computes most of it: the estimated gCO\textsubscript{2}e of
-the AI assistance that produced Section~\ref{sec:optimisation}, plus the runs
-you spent measuring and testing, which on a cluster are themselves an
-allocation. Count those runs with the same factors as your baseline, and say
-which of the two parts you kept.
+\emph{Cost.} The AI assistance takes ten agent sessions, 62 requests and
+27\,924 output tokens, reasoning included. The course factor of 1.03~Wh per
+1\,000 output tokens~\cite{ries2026s8}, from one query scenario of Oviedo et
+al.~\cite{oviedo2026}, gives 0.029~kWh. As the course prescribes, the grid
+factor of Section~\ref{sec:lcia} converts it to 9.7~gCO\textsubscript{2}e. Where
+the model runs is not known, so that factor is an assumption for the AI service.
+The runs on Aion cost 8.87~g: 8.81~g for the ten measured runs and 0.06~g for
+twenty short jobs: failed launches, builds, sample tests and accounting. The total cost is
+18.6~gCO\textsubscript{2}e. Tests on the author's laptop are outside the
+boundary.
 
-\textbf{Check that the two numbers you divide come from the same machine.} A
-before measured on one partition and an after measured on another are not a
-saving, they are a comparison of two node types. If the queue moved you, rerun
-the before.}
+\emph{Payback.} The saving is $14.888-0.844=14.04$~gCO\textsubscript{2}e per
+run, so the payback is $18.6/14.04=1.32$~runs: the second run after the change
+repays it. At the assumed 100~runs per year, that takes about five days. The AI
+assistance accounts for 0.69 of these runs and the runs on Aion for 0.63.
+Compilation alone repays its own 7.3~g only after 109~runs, about 13~months,
+because it saves just 0.067~g per run. The general-purpose assistant that helped
+write this paper (Appendix~B) is not counted, because it does not produce the
+optimisation.
 
 \subsection{What this means}
-\guidance{Answer the question you asked in Section~\ref{sec:intro}, in one
-sentence, with the number. Then what a reader should take away, and what you
-would do next. Keep to results you have already reported, and to claims your
-figures carry.}
+One run of this job emits 15~gCO\textsubscript{2}e on an exclusive Aion node,
+more than half of it from cores held idle. Without a change to the program,
+right-sizing and compilation cut the footprint attributed to one run to
+0.84~g, and they repay their own 19~g within two runs. The lesson reaches
+beyond this job. For a serial program on a shared cluster, the allocation, not
+the code, sets the footprint. Correcting it pays back fast, because each run
+then saves almost all of its footprint. Making the code faster pays back slowly
+once the allocation is right. The next steps are to run the tool on other users'
+jobs, and to confirm the attributed energy with a measurement on a node that
+holds only the new request.
 
 % ---------------------------------------------------------------------
 \section{Threats to Validity}\label{sec:threats}
-This section lists the limitations of Section~\ref{sec:lcia} that remain open.
-For each, it gives the direction in which it moves the baseline of
-15~gCO\textsubscript{2}e and, where possible, by how much. Each shift below
-moves one input of \texttt{lcia-calculation.py} and holds the others fixed.
+This section gathers the limitations of Sections~\ref{sec:lcia}
+to~\ref{sec:payback}. For each, it states whether it makes the baseline of
+15~gCO\textsubscript{2}e, the optimised 0.84~g or the payback of 1.32~runs too
+high or too low and, where possible, by how much. Each shift moves one input of
+the calculation scripts and holds the others fixed.
 
-\emph{Missing whole-node power.} No instrument reaches the whole node. RAPL
-covers the processor packages only, and the memory term is a generic
-coefficient~\cite{lannelongue2021}, not a reading. The board, the local SSD, the
-network card and power conversion are not counted, so the result is too low.
-Their power on an Aion node is not published. Each 50~W they draw adds
-2.3~gCO\textsubscript{2}e per run, or 16\,\%. The memory coefficient can err in
-either direction. The idle rate assumed outside the Python step concerns at
-most 0.6~kJ per run, under 1\,\% of the node estimate. The idle reading is one
-60-second interval taken after the fifth run. If the idle draw varies over time,
-the 57\,\% hotspot share moves with it.
+\emph{Energy that is not measured.} No instrument reaches the whole node. The
+board, the local SSD, the network card and power conversion are not counted, so
+the result is too low. Each 50~W they draw adds 2.3~g per run, or 16\,\%. The
+memory term is a generic coefficient~\cite{lannelongue2021} and can err in
+either direction. The idle rate is a single 60-s reading, so the 57\,\% hotspot
+share moves with any change in idle draw over time. The energy of the network
+and the storage is left out, so the result is too low by an amount Aion does not
+publish.
 
-\emph{Proxy PUE.} The PUE of 1.36 is an EU average for 2023~\cite{eudc2025}, not
-a value measured at this site. Aion's blades are built on a cold plate that cools every component by
-direct contact~\cite{ulhpcaion}, which may put the site below the average, but
-no site value is published. A PUE of 1.1 gives
-12.4~gCO\textsubscript{2}e, 17\,\% less, and 1.6 gives
-17.2~gCO\textsubscript{2}e, 16\,\% more. Each step of 0.1 moves the result by
-about 1.0~g.
+\emph{Proxy factors.} The PUE of 1.36 is an EU average, not a site value, and
+Aion's cold-plate cooling~\cite{ulhpcaion} may put the site below it. A PUE of
+1.1 gives 12.4~g (17\,\% less), and 1.6 gives 17.2~g (16\,\% more). The grid
+factor describes low-voltage supply. If the site draws at a higher voltage, part
+of the grid losses does not apply, and the result is slightly too high. The
+dataset's description mentions high voltage although its title names low
+voltage; the study follows the title. The hardware proxy is a rack server,
+while an Aion node is one of three nodes in a blade~\cite{ulhpcaion}. The
+ecoinvent desktop would give 13.6~g (9\,\% less), and the R7525 with its SSDs
+16.5~g (11\,\% more). The node's own SSD, the chassis, the switches, the storage
+servers and the building are left out, so the result is too low. The R7525
+figure uses IPCC~2013, whose GWP100 for methane and N\textsubscript{2}O differs
+from IPCC~2021 by 3\,\% or less~\cite{myhre2013,ipcc2021}. Each 10\,\% change on
+the hardware term moves the total by 1.2\,\%. A four-year life gives 15.8~g
+(6\,\% more), and an eight-year life 14.4~g (3\,\% less). Downtime spreads
+production over fewer node-seconds, so the hardware term is too low by an
+unknown fraction.
 
-\emph{Grid factor.} The factor describes low-voltage consumption, including
-distribution losses. If the site is supplied at a higher voltage, part of those
-losses does not apply, and the result is slightly too high. The voltage of the
-connection is not published. The factor rests on the 2020--2024 market and
-is shown to three significant figures. Its documentation also refers to the
-high voltage level, against its own title.
+\emph{Cache state.} File caches are neither reset nor measured. The counting
+step is bound by computation, with a CPU time of 99.8\,\% of its walltime, so a
+cache effect is bounded by the 2.5\,\% spread of the node estimates.
 
-\emph{Proxy hardware data.} No production footprint exists for an Aion node.
-The R7525 is a rack server with its own chassis, fans and power supplies. An
-Aion node is one of three nodes in a cold-plate-cooled blade~\cite{ulhpcaion}. The SSDs are removed
-on the assumption that the rest of the R7525 resembles the node. With the
-ecoinvent desktop instead, the hardware term falls to 0.43~g and the total to
-13.6~g, 9\,\% less. With the R7525 as published, the hardware term rises to 3.4~g
-and the total to 16.5~g, 11\,\% more. The R7525 figure uses IPCC~2013. For
-methane and N\textsubscript{2}O this moves the hardware term by a few per cent
-and the total by less than 1\,\% (Section~\ref{sec:lcia}). The fluorinated gases
-of chip making are not broken down in the Dell study, so their change between
-the two methods is not checked. The production of the chassis, the switches,
-the storage servers and the building is left out, so the result is too low.
+\emph{Equal nodes.} The study relies on the assumption of equal regular nodes
+(Section~\ref{sec:goalscope}) at three points. The baseline timing and energy
+come from two different nodes, the optimised runs fall on two others, and one
+idle reading serves every node. The runs bound the error. The baseline median
+is 368~s on one node and 364~s on the other; with the first, the result would be
+15.05 instead of 14.89~g, 1.1\,\% more. An idle reading on a third node gives
+178.6~W against 182.6~W, 2\,\% apart, which moves the idle share by the same
+fraction. In the optimised series, the runs on the second node differ from those
+on the first by less than 2\,\%, in opposite directions for the two versions.
+That is less than the 4\,\% spread of the runs on one node alone. The data
+therefore do not contradict the assumption, but two runs cannot prove it. A node
+2\,\% slower moves the optimised result by about 2\,\% and the payback by less
+than 0.03~runs. The 7.4\,\% gain of compilation exceeds these differences, and
+the alternating runs put both versions on the same nodes.
 
-\emph{Assumed service life.} The six-year life is an assumption. Aion has run
-for five years and has no published retirement date~\cite{ulhpcaion}. A
-four-year life gives 15.8~g, 6\,\% more, and an eight-year life gives 14.4~g,
-3\,\% less. The allocation also assumes that the node is available for every
-second of its life. Downtime and idle periods between jobs spread production
-over fewer node-seconds, so the hardware term is too low by that unknown
-fraction.
+\emph{Attributed energy after optimisation.} The optimised energy is
+attributed, not measured. Its program term reuses the baseline's 5.2~W per busy
+core, although the compiled program may draw a different power. That term is
+27\,\% of the optimised result, so an error of 20\,\% on it moves the result by
+0.05~g and the saving by less than 0.4\,\%. The saving also assumes that other
+jobs use the 122~cores and the memory this job frees; 132 regular nodes are
+shared between jobs on 27~October~2026. If the freed cores stayed idle, each run
+would bear the whole node's idle draw: the saving would fall to 6.5~g and the
+payback would rise to 2.9~runs.
 
-\emph{Cache state.} File system caches were neither reset nor measured, so a
-run may have read its input from the page cache rather than from GPFS. The
-Python step is bound by computation: its CPU time is 99.7\,\% of its elapsed
-time in job 15861652. Reading from storage is therefore a small part of the
-walltime. The walltimes of the five paired runs span 359 to 368~s, and the node
-estimate spans 101.6 to 104.2~kJ. A cache effect is bounded by that 2.5\,\%
-spread.
+\emph{Cost of the AI assistance.} The token factor is a ratio from one
+short-query scenario, 500 input and 300 output tokens to a model of more than
+200~billion parameters~\cite{oviedo2026}, not a measurement of these sessions.
+Agent sessions re-send their context: these read about 11\,500 input tokens per
+request, and very long inputs raise the energy of reading them
+substantially~\cite{oviedo2026}. The model is a mixture of experts, with
+13~billion of its 284~billion parameters active per token~\cite{openrouterdsv4},
+on hardware that is not published. If the assistance cost ten times the
+estimate, the payback would be 7.5~runs, about four weeks. The requests reach
+one of three providers whose location the session records do not give. Each
+100~gCO\textsubscript{2}e/kWh more on their grid adds 0.20~runs to the payback,
+and twice the Luxembourg factor gives 2.0~runs.
 
-\emph{Measurement on different nodes.} The walltimes of the functional unit come
-from \texttt{aion-0127}, and the energy from \texttt{aion-0144}. The chain uses
-only the \texttt{aion-0144} values. With the 368~s of \texttt{aion-0127}, the
-result would be 15.05 instead of 14.89~gCO\textsubscript{2}e, 1.1\,\% more. An
-idle package reading on a third node, \texttt{aion-0234}, gave 178.6~W against
-182.6~W on \texttt{aion-0144}. Identical nodes thus differ by about 2\,\% at
-idle.
-
-\emph{Figures with different boundaries.} The electricity terms cover use only.
-The R7525 figure covers production, while the ecoinvent desktop includes
-packaging and disposal. End of life is outside the result, so the result is too
-low by the unknown share of disposal. The car comparator of
-Section~\ref{sec:interpretation} is cradle to grave, which makes one run look
-smaller next to it than a comparison on the same boundary would.
+\emph{Discarded path.} The agent's discarded rewrite of the counter cost
+10.1~g: 7.1~g of AI assistance and 3.0~g of runs. Counted, it would raise the
+payback from 1.32 to 2.04~runs.
 
 \emph{Runs per year.} The figure of 100~runs per year is an assumption. It
-leaves the result per run unchanged and scales only the annual figure and the
-payback period of Section~\ref{sec:payback}.
+changes the annual footprint and the payback period, not the result per run.
 
-\emph{One criterion, burden shifting.} The result covers climate change only, on
-one job. It hides the mineral and water use of hardware production. A change
-that frees the node may also lead the job to be run more often. The result
-supports no comparison with another job.
+\emph{Scope.} The result covers climate change only, for one job, and hides the
+mineral and water use of hardware production. End of life is outside it, so it
+is too low by the share of disposal, while the ecoinvent desktop proxy includes
+packaging and disposal. The car comparator is cradle to grave, which makes one
+run look smaller beside it. A change that frees the node may lead the job to run
+more often. The result supports no comparison with another job.
 
 % ---------------------------------------------------------------------
 % Unnumbered on purpose, for two reasons. The paper has six numbered
@@ -682,21 +648,16 @@ supports no comparison with another job.
 % paragraph, a reviewer reads a paper whose AI assistance is declared
 % nowhere.
 \section*{AI Usage Transparency}
-\guidance{Three or four sentences, and the only place your reviewers read
-about your AI use.
-
-Name the models you worked with, say what you used each one for and which
-sections they touched. State
-that you verified every output you kept, and that you are the author of this
-paper and of the script of Section~\ref{sec:optimisation}. Close with the
-total estimated gCO\textsubscript{2}e of that assistance, the figure
-Appendix~B computes.
-
-Two things stay out of it. Anything that points at you: no file path, no
-repository URL, no folder name, since this paragraph travels with the
-anonymised copy your reviewers receive. And the detail: the per-model
-counts, the arithmetic and the wrong answers you caught belong in
-Appendix~B.}
+Two AI models assist this work. Claude Opus~5.5, used in chat and through the
+Claude Code agent, guides the setting up of the job and its measurements, runs
+the measurement campaign of Section~\ref{sec:optimisation}, writes calculation
+scripts, checks facts and references, and edits and proofreads the text of every
+section. DeepSeek V4 Flash, used through the OpenCode agent, writes the job
+scripts, the build and the tool of Section~\ref{sec:optimisation}, and no text of
+this paper. Every output kept is checked against the measurements or against a
+source the author reads, and the author is responsible for this paper and for
+the script of Section~\ref{sec:generalises}. Appendix~B estimates this
+assistance at \aitotal~gCO\textsubscript{2}e.
 
 \ifguidance
 \noindent\textit{Worked example, written from the two journal entries of
@@ -749,16 +710,17 @@ Compute node & Walltime & 368~s (range 362--372) & \texttt{sacct} \texttt{Elapse
              & Electricity, 1 core active & 36.7~kJ & Green Algorithms~\cite{lannelongue2021} & model \\
              & Electricity, 128 cores at TDP & 241~kJ & Green Algorithms~\cite{lannelongue2021} & model \\
              & Hardware & 2 $\times$ EPYC 7H12, 256~GB & \cite{ulhpcaion}, \texttt{lscpu} & looked up \\
-             & Manufacture, ecoinvent proxy & 221~kg CO\textsubscript{2}e per unit & \cite{ecoinvent311}, desktop without screen & looked up \\
-             & Manufacture, vendor proxy & 1\,768.4~kg CO\textsubscript{2}e per unit & \cite{dellr7525}, R7525, IPCC 2013 & looked up \\
+             & Manufacture, ecoinvent proxy & 221~kgCO\textsubscript{2}e per unit & \cite{ecoinvent311}, desktop without screen & looked up \\
+             & Manufacture, vendor proxy & 1\,768.4~kgCO\textsubscript{2}e per unit & \cite{dellr7525}, R7525, IPCC 2013 & looked up \\
              & Service life & 6~years & Section~\ref{sec:threats} & assumption \\
-             & Share per run & $1.94\times10^{-6}$ & 368~s / 189\,345\,600~s & derived \\
+             & Share per run & $1.94\times10^{-6}$ & 368~s / 189\,345\,600~s (Table~\ref{tab:chain}: 364~s) & derived \\
 Interconnect & Bytes read from storage & $\approx$187.7~MB + 19~MiB & \texttt{MaxDiskRead}, batch minus pipe & inferred \\
              & Bytes written to storage & 1\,972~B + log & \texttt{stat} of output & measured \\
 Storage      & Input stored & 187\,693\,955~B & \texttt{stat}, SHA-256 checked (28 Sep) & measured \\
              & Output stored & 1\,972~B & \texttt{stat} & measured \\
 Site         & PUE & 1.36 & EU average, 2023 data~\cite{eudc2025} & declared proxy \\
 All          & Runs per year & 100 & Section~\ref{sec:threats} & assumption \\
+             & Node performance & equal on every regular node & Sections~\ref{sec:goalscope}, \ref{sec:threats} & assumption \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -783,7 +745,7 @@ Node estimate & 103\,146~J $=$ 0.0287~kWh & sum of the three, per run & derived 
 Site electricity & 0.0390~kWh & $\times$ PUE 1.36~\cite{eudc2025} & declared proxy \\
 Grid factor & 337~gCO\textsubscript{2}e/kWh & ecoinvent 3.11, electricity low voltage, LU~\cite{ecoinventlu}, read 19 Oct 2026 & looked up \\
 \textbf{Operational} & \textbf{13.1~gCO\textsubscript{2}e} & $0.0390 \times 337$ & derived \\
-Hardware production & 913.7~kg CO\textsubscript{2}e (IPCC 2013) & R7525 1\,768.4~kg $-$ 854.7~kg SSDs~\cite{dellr7525} & looked up \\
+Hardware production & 913.7~kgCO\textsubscript{2}e (IPCC 2013) & R7525 1\,768.4~kg $-$ 854.7~kg SSDs~\cite{dellr7525} & looked up \\
 Share per run & $1.92\times10^{-6}$ & 364~s / 189\,345\,600~s (six years) & assumption \\
 \textbf{Embodied} & \textbf{1.76~gCO\textsubscript{2}e} & $913.7~\text{kg} \times 1.92\times10^{-6}$ & derived \\
 \textbf{Total} & \textbf{15~gCO\textsubscript{2}e per run} & 13.1 $+$ 1.8, two significant figures & derived \\
@@ -809,6 +771,59 @@ Green Algorithms, 1 core $+$ 256~GB & 36.3 & 0.0137 & 4.6 & 6.4 \\
 Green Algorithms, 128 cores at rated power $+$ 256~GB & 238.6 & 0.0901 & 30.4 & 32.1 \\
 \midrule
 CPU packages above idle, Python step (the program's own work) & 1.9 & 0.0007 & 0.24 & 2.0 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[!t]
+\caption{One run before and after optimisation (Section~\ref{sec:afteropt}).
+Before: median of the five RAPL runs on \texttt{aion-0144}, exclusive node.
+After: medians of five runs each on 10~November~2026 on shared regular nodes
+(right-sized: jobs 16225119, 23, 27, 31, 35; Cython: jobs 16225121, 25, 29, 33, 37), the same
+unchanged program, energy attributed by share of node; computed by
+\texttt{optimised-calculation.py}. Same factors throughout: PUE 1.36,
+337~gCO\textsubscript{2}e/kWh, 913.7~kgCO\textsubscript{2}e per node over six
+years.}
+\label{tab:afteropt}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+Quantity & Before & Right-sized & $+$ Cython & Source or rule \\
+\midrule
+Cores held & 128 & 6 & 6 & \texttt{sacct} \texttt{AllocCPUS} \\
+Memory reserved & 256~GB (whole node) & 10.74~GB & 10.74~GB & \texttt{sacct} \texttt{ReqMem} (10~GiB) \\
+Walltime (\texttt{Elapsed}) & 364~s & 367~s (362--377) & 340~s (335--351) & \texttt{sacct} \\
+Peak memory of the program & 7.40~GiB & 7.40~GiB & 7.40~GiB & \texttt{sacct} \texttt{MaxRSS} \\
+Idle package draw charged & 66.6~kJ & 3.1~kJ & 2.9~kJ & 182.6~W $\times$ cores/128 $\times$ walltime \\
+Program's own work & 1.9~kJ & 1.9~kJ & 1.8~kJ & 5.2~W per busy core $\times$ CPU time \\
+Memory & 34.7~kJ & 1.5~kJ & 1.4~kJ & 0.3725~W/GB $\times$ GB reserved $\times$ walltime \\
+Node energy & 103.1~kJ & 6.5~kJ & 6.0~kJ & sum; before measured with RAPL, after attributed \\
+\textbf{Operational} & \textbf{13.13~g} & \textbf{0.828~g} & \textbf{0.768~g} & $\times$ PUE $\times$ grid \\
+\textbf{Embodied} & \textbf{1.76~g} & \textbf{0.083~g} & \textbf{0.077~g} & by the larger of core and memory share \\
+\textbf{Total, gCO\textsubscript{2}e per run} & \textbf{14.89} & \textbf{0.911} & \textbf{0.844} & saving 14.04~g (94\,\%) with Cython \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[!t]
+\caption{Carbon payback of the optimisation (Section~\ref{sec:payback}),
+computed on 10~November~2026 by \texttt{opencode-usage.py} and
+\texttt{payback-calculation.py} from the exported OpenCode sessions and the Aion
+accounting records.}
+\label{tab:payback}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrl@{}}
+\toprule
+Item & gCO\textsubscript{2}e & Source or rule \\
+\midrule
+AI assistance: 10 OpenCode sessions, 62 requests, 27\,924 output tokens & 9.69 & 1.03~Wh/1\,000 output tokens~\cite{ries2026s8,oviedo2026} $\times$ 337~g/kWh, assumed \\
+Ten measured runs, five per variant & 8.81 & Table~\ref{tab:afteropt} chain, per run \\
+Seven short jobs (launch failures, builds, sample tests), 13 accounting jobs & 0.06 & same chain, 2--12~s each \\
+\textbf{Cost of producing the optimisation} & \textbf{18.57} & sum, kept path only \\
+Saving per run & 14.04 & $14.888 - 0.844$ \\
+\textbf{Payback} & \textbf{1.32 runs} & cost / saving; about 5~days at 100~runs per year \\
+\midrule
+Discarded counter rewrite, not counted & 10.10 & session 7.06~g $+$ five runs 3.04~g; payback 2.04~runs if counted \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -848,8 +863,11 @@ follow it are worked examples. They disappear with the guidance.}
 \textbf{Input tokens:} 13\,418\,158, mostly re-read context \\
 \textbf{Output tokens:} 88\,944 \\
 \textbf{Energy factor:} 1.03 Wh per 1000 output tokens, so 91.6 Wh \\
-\textbf{Estimated:} converted to gCO\textsubscript{2}e with the grid factor
-declared in Section~\ref{sec:lcia}
+\textbf{Grid factor:} 337~gCO\textsubscript{2}e per kWh, ecoinvent 3.11,
+Luxembourg low-voltage market, read on 19~October~2026 \\
+\textbf{Estimated:} 30.9~gCO\textsubscript{2}e \\
+\textbf{Comparable to:} 18.3 hours of a 5\,W LED, or 106~m in a small petrol
+car~\cite{ries2026s2}
 
 \textbf{Kinds of task, and which sections they touched:} I used the chat as a
 guide while I set up the repository and the job, and then for general
@@ -866,6 +884,169 @@ chat.
   rewrote the sentence.
 \item some reference details were wrong: the release year of ecoinvent 3.11 and
   the data year of the EU PUE. I checked each reference at its source.
+\end{enumerate}
+
+\medskip
+\noindent\textbf{AI model:} DeepSeek V4 Flash, pinned as
+\texttt{deepseek/deepseek-v4-flash-0731} through OpenRouter \\
+\textbf{Interaction:} agentic, through OpenCode with the course
+configuration: version 1.19.3 on 27~October~2026 from 20:03 to 20:40~UTC
+(sessions 1--8), version 2.2.0 on 10~November~2026 from 15:56 to 16:02~UTC
+(sessions 9--11) \\
+\textbf{Prompts:} 14, in 11 sessions, answered in 92 model requests \\
+\textbf{Input tokens:} 1\,299\,052 (183\,148 new, 1\,115\,904 read from the
+provider's cache) \\
+\textbf{Output tokens:} 48\,256 (25\,803 of answer, 22\,453 of reasoning) \\
+\textbf{Energy factor:} 1.03~Wh per 1000 output tokens, the course factor~\cite{ries2026s8,oviedo2026},
+reasoning counted as output, so 49.7~Wh \\
+\textbf{Grid factor:} 337~gCO\textsubscript{2}e per kWh, ecoinvent 3.11,
+Luxembourg low-voltage market, read on 19~October~2026 \\
+\textbf{Estimated:} 16.8~gCO\textsubscript{2}e in all. Of this, 9.7~g is the
+kept path, the AI part of the cost in Section~\ref{sec:payback}, and 7.1~g is
+the discarded counter of session~4 \\
+\textbf{Comparable to:} 9.9 hours of a 5\,W LED, or 58~m in a small petrol
+car~\cite{ries2026s2} \\
+\textbf{Source:} the eleven sessions exported from OpenCode and summed by a
+script, both in the project repository; OpenRouter billed USD~0.081.
+
+\textbf{Configuration:} before the first task, OpenCode was set up to spend
+few tokens, as Sessions~7 and~8 advise. Three agent files fix the model, a low
+reasoning effort, at most 30 steps per request (10 for the reader), no web
+access and a short list of allowed shell commands, with no \texttt{ssh},
+\texttt{sbatch} or \texttt{git}: an \emph{optimiser} for the job, a
+\emph{builder} for the tool and a \emph{reader} that only reads. A five-line
+project instruction file replaces the long one OpenCode would otherwise load.
+The fixed cost of a one-word request falls from 12\,365 input tokens to 5\,920
+(optimiser) and 4\,786 (reader). Every task prompt names the input, the
+objective, the constraints from the LCA and the expected output. The agent
+cannot reach Aion: every run there was submitted and collected outside
+OpenCode. I entered the prompts of sessions 1--8 directly in the OpenCode TUI.
+Sessions 9--11 were started from the command line (\texttt{opencode run}) by
+Claude Code, at my request, with the prompts listed below. I checked every
+output before use.
+
+\textbf{Sessions, prompts and what the agent did:}
+\begin{enumerate}
+\item \emph{Smoke test, default agent.} Prompt: ``Reply with exactly one word:
+  ok''. It answers ``ok''. 12\,365 input tokens, 17 output, 0.006~g.
+\item \emph{Smoke test, reader agent.} Same prompt and answer. 4\,786 input
+  tokens, 2 output, 0.001~g.
+\item \emph{Smoke test, optimiser agent.} Same prompt and answer. 5\,920 input
+  tokens, 14 output, 0.005~g.
+\item \emph{Counter (optimiser).} Prompt: write \texttt{kc-py1-opt.py}, a
+  faster, lower-memory replacement for the frozen counter, with the same input,
+  a byte-identical histogram, one thread and only the standard library; test it
+  against the frozen counter on a 20\,000-line sample and report both timings.
+  It reads the frozen counter and job script, writes the new counter (each
+  31-mer as a 62-bit integer, updated base by base), finds and fixes a bug that
+  left stale bits in the integer, and shows an empty difference on the sample
+  (0.46 to 0.48~s against 0.55 to 0.73~s). It stops at the 30-step limit.
+  30 requests, 20\,332 output tokens, 7.06~g. (IV.B)
+\item \emph{Job script (optimiser).} Prompt: write \texttt{run-optimised.sh}
+  from the frozen Slurm script, with the same input, modules and logging, but
+  one task, one core, no exclusive node, memory sized to the measured
+  5.65~GiB peak plus a margin and a time limit that fits a slow node; report
+  each \texttt{\#SBATCH} change and the hotspot it attacks. It requests 1 core,
+  8~GB and 10~minutes, drops exclusive access and tables the changes.
+  4 requests, 1\,537 output tokens, 0.53~g. (IV.B)
+\item \emph{Tool (builder), plus one follow-up.} Prompt: write
+  \texttt{allocation-footprint.py} and its README; from a saved
+  \texttt{sacct} record or a job number, print what the job held and used, the
+  gCO\textsubscript{2}e of that allocation and of a right-sized one, and the
+  \texttt{\#SBATCH} lines to use; every factor an option with this study's
+  values as defaults; a clear error on missing fields or an unfinished job;
+  check it on a baseline record, on the idle measurement and on the probe
+  record that lacks fields. Follow-up: print \texttt{-{}-ntasks=1} and
+  \texttt{-{}-cpus-per-task} instead of \texttt{-{}-ntasks-per-node}. It writes
+  both files, runs the three checks (the probe fails cleanly) and makes the
+  fix. 15 requests, 11\,286 output tokens, 3.92~g. (IV.D)
+\item \emph{Launch fix (optimiser), plus one follow-up, for the script of
+  session~4's counter.} Prompt: the three
+  runs on Aion fail in 2~s with an \texttt{srun} error, because the batch
+  partition grants at most 1\,750~MB per core and raises the 8~GB request to
+  5~cores; make the request consistent, with as few cores as that allows, a
+  safe margin above the peak and one task. It requests 4~cores and 6~GB.
+  Follow-up: 6~GB leaves only 6\,\% above the peak, so use 6\,800~MB, still
+  within 4~cores. It makes the change. 5 requests, 2\,097 output tokens,
+  0.73~g. (IV.B)
+\item \emph{Python 3.6 fix (builder).} Prompt: on the Aion login node, whose
+  Python is 3.6.8, the tool fails on a keyword that version lacks; make the
+  whole script run on 3.6, correct the README's units, and rerun the baseline
+  check. It replaces the keyword, searches the script for other features newer
+  than 3.6 (none), corrects the README and reruns the check. 10 requests,
+  2\,773 output tokens, 0.96~g. (IV.D)
+\item \emph{Right-sized script (optimiser), 10~November.} After the tutoring
+  session fixed the scope to everything around the code, I rewrote the
+  optimiser's instructions to forbid any change to the program. Prompt: write
+  \texttt{run-rightsized.sh}, which runs the unchanged \texttt{kc-py1.py} with
+  one task, no exclusive node, memory of 1.25 times the 7.40~GiB peak rounded
+  up to whole GiB, the fewest cores whose 1\,750~MB each cover it, and a
+  10-minute limit. It requests 6~cores and 10~GiB and shows the arithmetic.
+  4 requests, 1\,427 output tokens, 0.50~g. (IV.B)
+\item \emph{Cython build (optimiser).} Prompt: compile the unchanged source
+  with Cython into a standalone executable in a short build job that prints the
+  SHA-256 of the source and runs a one-read test, and write
+  \texttt{run-cython.sh} with the request of \texttt{run-rightsized.sh}. It
+  writes both. 15 requests, 7\,307 output tokens, 2.54~g. (IV.B)
+\item \emph{Build fix (optimiser).} Prompt: the build fails because Cython
+  rejects \texttt{kc-py1} as a module name; fix it without touching the source.
+  It adds an explicit module name. 6 requests, 1\,464 output tokens,
+  0.51~g. (IV.B)
+\end{enumerate}
+Session~4's counter changes the program, which the scope of the study
+excludes. It is kept only as a record, its five runs are discarded, and the
+payback leaves out both (Section~\ref{sec:threats}). Sessions~5 and~7 wrote the
+job script for that counter; their lesson on Aion's memory limit per core is
+what the request of session~9 follows.
+The follow-ups of sessions 6 and 7 ran under OpenCode's default agent, because
+those sessions were resumed without naming their agent. The exports show the
+same pinned model for all 92 requests, but the step limit and the list of
+allowed commands did not apply to those 7 requests. Two attempts spent no
+tokens and are not counted: a first run that waited for keyboard input without
+starting a session, and a session-title request that OpenCode sends to another
+model by default, which found no provider and failed.
+
+\textbf{Kinds of task, and which sections they touched:} writing code only:
+the right-sized job script, the Cython build and its job script (IV.B, measured
+in IV.C), a discarded rewrite of the counter (IV.B) and the tool that carries
+the method to other jobs (IV.D). The tokens of every session except
+session~4 are the AI part of the cost in Section~\ref{sec:payback}. It wrote no text of this paper, found no
+reference and ran nothing on Aion.
+
+\textbf{Wrong information:}
+\begin{enumerate}
+\item it stated that its rewritten counter peaks ``well under 1~GiB'' on the
+  full input. Its test covered only a 20\,000-line sample. A full run under
+  \texttt{/usr/bin/time} measured 5.65~GiB, and the memory request of that
+  counter's job script rested on that figure.
+\item its first job script asked for 8~GB on one core. Neither the prompt nor
+  the script allowed for Aion's limit of 1\,750~MB per core, so the scheduler
+  raised the job to 5~cores and the three runs failed within 3~s. I found the
+  error in the job logs and in \texttt{sacct}, and read the limit with
+  \texttt{scontrol}.
+\item it estimated 2 to 4~gCO\textsubscript{2}e per run after optimisation,
+  with no calculation behind it. Its five runs, attributed with the chain of
+  Section~\ref{sec:afteropt}, gave 0.61~g. I did not use the estimate.
+\item it called 6~GB ``comfortably above'' the 5.65~GiB peak. That is a 6\,\%
+  margin, for a peak measured with a different Python build than Aion's. I
+  rejected it before any run and asked for 6\,800~MB.
+\item the tool printed \texttt{-{}-ntasks-per-node=N}, which starts N copies of
+  a single-threaded program. I saw it when reading the tool's output and asked
+  for the fix.
+\item the tool used a Python feature that the Aion login node's Python~3.6
+  lacks, so it crashed there. I found it when running the tool live on Aion.
+\item its README called the 913.7~kg production footprint a hardware mass, and
+  gave the memory units as GiB instead of GB. I found both by comparing the
+  README with my source register.
+\item its Cython build script named the module after the file, which Cython
+  rejects because of the hyphen, so the first build failed within 3~s. I found
+  the error in the build log.
+\item it described the Cython executable as having ``no interpreter
+  startup''. The executable embeds and starts the same Python interpreter. I
+  checked it against the build command and did not use the claim.
+\item after the build fix, it gave the SHA-256 of the histogram as the
+  expected SHA-256 of the source file. I compared it with the hash of the frozen
+  source in the build log.
 \end{enumerate}
 
 % Blank entry: hidden until filled in, then move it out of the \ifguidance.
